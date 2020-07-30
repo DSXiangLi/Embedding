@@ -1,0 +1,7 @@
+.DS_Store
+.idea/
+.gitignore.swp
+__pycache__/
+checkpoint/*
+data/sogou_news_big/news_sohusite_xml*
+data/sogou_news_big/corpus*

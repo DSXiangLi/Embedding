@@ -35,6 +35,7 @@ class HuffmanTree(object):
         self.freq_dic = freq_dic
         self.all_paths = {}
         self.all_codes = {}
+        self.node_index = 0
 
     @staticmethod
     def merge_node(left, right):
@@ -47,6 +48,8 @@ class HuffmanTree(object):
         """
         Build huffman tree with word being leaves
         """
+        TreeNode.total_node = 0 # avoid train_and_evaluate has different node_index
+
         heap_nodes = []
         for word_index, (char, freq) in enumerate(self.freq_dic.items()):
             tmp = TreeNode( freq, char, word_index, is_leaf=True )

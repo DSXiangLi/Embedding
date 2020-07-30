@@ -11,3 +11,11 @@ TRAIN_PARAMS = {
     'window_size': 3,
     'buffer_size':128
 }
+
+
+RUN_CONFIG = {
+    'summary_steps': 50,
+    'log_steps': 50,
+    'keep_checkpoint_max':3,
+    'save_steps': 50
+}
