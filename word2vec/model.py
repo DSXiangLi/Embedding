@@ -27,6 +27,7 @@ def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vect
     train mode : binary classification
     eval mode : multi-class classification
     """
+
     if mode == tf.estimator.ModeKeys.TRAIN:
         if params['loss'] == 'nce_loss':
             loss = tf.nn.nce_loss(
@@ -37,7 +38,6 @@ def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vect
                 num_sampled=params['ng_sample'],
                 num_classes=params['vocab_size'],
                 num_true=1,
-                seed=1234,
                 name='nce_loss',
                 partition_strategy='div'
             )
@@ -70,6 +70,13 @@ def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vect
 
 
 def model_fn(features, labels, mode, params):
+
+    assert params['model'] in ['CBOW','SG'], 'For moedl only [CBOW | SG] are supported'
+    assert params['train_algo'] in ['HS','NS'], 'For train_algo only [HS | NS] are supported'
+
+    if params['train_algo'] == 'NS':
+        assert params['loss'] in ['nce_loss','sample_loss'], 'For Negative Sampling loss only [nce_loss|sample_loss] are supported'
+
     if params['train_algo'] == 'HS':
         # If Hierarchy Softmax is used, initialize a huffman tree first
         hstree = HierarchySoftmax( params['freq_dict'] )

@@ -1,4 +1,4 @@
-import jieba
+import jieba_fast as jieba
 from tqdm import tqdm
 import string
 import re
@@ -72,6 +72,7 @@ if __name__ == '__main__':
             sentences.append( line )
 
     print('String Preprocessing and word Segmentation')
+    jieba.enable_parallel(processnum = 8)
     preprocess = StrUtils()
     sentences = preprocess.preprocess(sentences)
     sentences = preprocess.word_cut(sentences)

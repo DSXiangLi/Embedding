@@ -1,17 +1,24 @@
 import tensorflow as tf
 import collections
+import os
 from config.default_config import INVALID_INDEX
 
 class Word2VecDataset(object):
-    def __init__(self, filename, model, window_size, epochs, batch_size, buffer_size ):
+    def __init__(self, filename, model, window_size, epochs, batch_size, buffer_size, min_count, sample_rate ):
         self.filename = filename
         self.model = model
         self.epochs = epochs
         self.batch_size = batch_size
         self.buffer_size = buffer_size
         self.window_size = window_size
+        self.min_count = min_count
+        self.sample_rate = sample_rate
         self._dictionary = None
         self.word_index = None
+        self.param_check()
+
+    def param_check(self):
+        assert self.model in ['CBOW', 'SG'], 'For moedl only [CBOW | SG] are supported'
 
     @property
     def dictionary(self):
@@ -31,19 +38,41 @@ class Word2VecDataset(object):
             for line in f:
                 dictionary.update(line.strip().split())
 
-        self._dictionary = collections.OrderedDict( sorted(dictionary.items(), key = lambda x:x[1], reverse = False) )
+        self._org_vocab_size = len(dictionary)
+
+        if self.min_count >0:
+            dictionary = dict([(i,j) for i,j in dictionary.items()  if j >= self.min_count  ])
+
+        self._dictionary = collections.OrderedDict( sorted(dictionary.items(), key = lambda x:x[1], reverse = True) )
 
     def build_wordtable(self):
-
+        # word_frequency < self.min_count will be map to -1
         with tf.name_scope('wordtable'):
-            return tf.lookup.StaticVocabularyTable(
+            return tf.lookup.StaticHashTable(
                 initializer = tf.lookup.KeyValueTensorInitializer(
                     keys = list(self._dictionary.keys()),
                     values = list(range(len(self._dictionary))),
                     key_dtype = tf.string,
                     value_dtype = tf.int64
-                ), num_oov_buckets = 1
+                ), default_value = INVALID_INDEX # all out of vocabulary will be map to INVALID_INDEX
             )
+
+    def build_sampletable(self):
+        with tf.name_scope('sampletable'):
+            return tf.lookup.StaticHashTable(
+                initializer = tf.lookup.KeyValueTensorInitializer(
+                    keys =  list(range(len(self._dictionary))),
+                    values = [ 1- (self.sample_rate * self._org_vocab_size/i) **0.5 for i in self._dictionary.values() ],
+                    key_dtype = tf.int64,
+                    value_dtype = tf.float32,
+                ), default_value = INVALID_INDEX # all out of vocabulary will be map to INVALID_INDEX
+            )
+
+    @staticmethod
+    def subsample(tokens, sampletable):
+        return tf.boolean_mask(tensor = tokens,
+                               mask = tf.less(sampletable.lookup(tokens),
+                                              tf.random_uniform(shape = [tf.size(tokens)], minval = 0, maxval =1)))
 
     @staticmethod
     def window_slice_func(model, window_size):
@@ -109,19 +138,22 @@ class Word2VecDataset(object):
         dataset is generated in following steps:
         1. sentence split into list of words
         2. map words to tokens
+        3. filter out word below min_count, subsample vocab given sample rate
         3. apply window slicing of each sentences, every token is label, features are padded to same length
-
         4. shuffle, repeat, batch
         """
 
         def input_fn():
             wordtable = self.build_wordtable() # must be init after estimator, because estimator creates new graph
+            sampletable = self.build_sampletable()
             window_slice_func = Word2VecDataset.window_slice_func( self.model, self.window_size )
 
             dataset = tf.data.TextLineDataset(self.filename).\
-                        map(lambda x: tf.string_split([x]).values).\
-                        filter(lambda x: tf.greater(tf.size(x), 2)).\
-                        map(lambda x: wordtable.lookup(x)).\
+                        map(lambda x: tf.string_split([tf.string_strip(x)]).values).\
+                        map(lambda x: wordtable.lookup(x)). \
+                        map( lambda x: tf.boolean_mask( x, tf.not_equal( x, INVALID_INDEX ) ) ). \
+                        map(lambda x: Word2VecDataset.subsample(x, sampletable)).\
+                        filter( lambda x: tf.greater( tf.size( x ), 2 ) ).\
                         map( lambda x: window_slice_func( x ) ).\
                         flat_map( lambda features, label: tf.data.Dataset.from_tensor_slices( (features, label) ) )
 
@@ -135,6 +167,8 @@ class Word2VecDataset(object):
             return dataset
         return input_fn
 
+
+
 if __name__ == '__main__':
     # test
     input_pipe = Word2VecDataset(filename = './data/sogou_news/corpus_new.txt',
@@ -142,6 +176,8 @@ if __name__ == '__main__':
                                  window_size = 2,
                                  epochs = 10,
                                  batch_size =5,
+                                 min_count = 2,
+                                 sample_rate = 0.01,
                                  buffer_size = 128)
 
     input_pipe.build_dictionary()
@@ -157,6 +193,4 @@ if __name__ == '__main__':
     sess.run(tf.global_variables_initializer())
     sess.run(iterator.initializer)
 
-    features, labels = sess.run(iterator.get_next() )
-    print(features)
-    print(labels)
+    sess.run(iterator.get_next() )

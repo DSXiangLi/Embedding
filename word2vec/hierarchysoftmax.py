@@ -39,7 +39,7 @@ class HuffmanTree(object):
 
     @staticmethod
     def merge_node(left, right):
-        parent = TreeNode(left.frequency+ right.frequency)
+        parent = TreeNode(left.frequency + right.frequency)
         parent.left = left
         parent.right = right
         return parent
@@ -127,7 +127,7 @@ class HierarchySoftmax(HuffmanTree):
             logits = tf.matmul(tf.expand_dims(input, axis=0), tf.transpose(output_embedding_vector) ) + bias # (1,emb_size) *(emb_size, real_path_length)
             loss.append(tf.nn.sigmoid_cross_entropy_with_logits(labels = code, logits = tf.squeeze(logits) ))
 
-        loss = tf.reduce_mean(tf.concat(loss, axis = 0), axis=0, name = 'hierarchy_softmax_loss') # real_path_length
+        loss = tf.reduce_mean(tf.concat(loss, axis = 0), axis=0, name = 'hierarchy_softmax_loss') # batch -> scaler
 
         return loss
 
@@ -140,7 +140,10 @@ if __name__ == '__main__':
                                  window_size = 2,
                                  epochs = 10,
                                  batch_size =5,
-                                 buffer_size = 128)
+                                 buffer_size = 128,
+                                 min_count=1,
+                                 sample_rate=0.01
+                                 )
 
     input_pipe.build_dictionary()
     print(input_pipe.dictionary)
