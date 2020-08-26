@@ -1,0 +1,9 @@
+
+from config.default_config import TRAIN_PARAMS
+
+TRAIN_PARAMS_UPDATE = {
+    'window_size': 5,
+    'sample_rate': 0.01
+}
+
+TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)

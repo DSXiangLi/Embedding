@@ -1,4 +1,4 @@
-INVALID_INDEX=-1
+INVALID_INDEX =-1
 
 CHECKPOINT_DIR = './checkpoint/{}_{}'
 
@@ -8,10 +8,9 @@ TRAIN_PARAMS = {
     'emb_size': 50,
     'learning_rate': 0.01,
     'ng_sample': 25,
-    'window_size':5,
     'buffer_size':128,
-    'min_count':2,
-    'sample_rate':0.01
+    'min_count': 2,
+    'decay_steps':-1
 }
 
 
