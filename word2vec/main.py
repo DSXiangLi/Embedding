@@ -1,9 +1,10 @@
 import tensorflow as tf
 import argparse
+import importlib
 from utils import clear_model, build_estimator
-from dataset import Word2VecDataset
-from model import model_fn
-from config.default_config import CHECKPOINT_DIR, TRAIN_PARAMS
+from word2vec.dataset import Word2VecDataset
+from word2vec.model import model_fn
+from config.default_config import CHECKPOINT_DIR
 
 #import sys
 #sys.path.append('/Users/xiangli/Desktop/Embedding/word2vec')
@@ -11,13 +12,18 @@ from config.default_config import CHECKPOINT_DIR, TRAIN_PARAMS
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.model, args.train_algo)
-    datafile = './data/{}/corpus_new.txt'.format(args.data)
+    data_file = './data/{}/corpus_new.txt'.format(args.data)
+    dict_file = './data/{}/dictionary.pkl'.format(args.data)
 
     if args.clear_model:
         clear_model(model_dir)
 
+    # Init config
+    TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
+
     # Init dataset
-    input_pipe = Word2VecDataset( filename= datafile,
+    input_pipe = Word2VecDataset( data_file = data_file,
+                                  dict_file = dict_file,
                                   model= args.model,
                                   window_size= TRAIN_PARAMS['window_size'],
                                   epochs= TRAIN_PARAMS['epochs'],
@@ -58,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument( '--loss', type=str, help='nce_loss or sample_loss or "" for Hierarchy Softmax', required=False, default = '' )
     parser.add_argument( '--step', type=str, help='train or predict', required=False, default = 'train' )
     parser.add_argument( '--clear_model', type=int, help= 'Whether to clear existing model', required=False, default=1)
-    parser.add_argument( '--data', type=str, help='which data to use[data should be list of tokenized string]', required=False, default='sogou_news')
+    parser.add_argument( '--data', type=str, help='which data to use[data should be list of to -kenized string]', required=False, default='sogou_news')
     args = parser.parse_args()
 
     main(args)

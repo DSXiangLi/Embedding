@@ -51,7 +51,3 @@ def write_projector_meta(log_dir, dictionary):
         f.write( "Index\tLabel\n" )
         for word_index, word in enumerate(dictionary.keys()):
             f.write("%d\t%s\n" % (word_index, word))
-
-
-
-if __name__ == '__main__':

@@ -135,14 +135,15 @@ class HierarchySoftmax(HuffmanTree):
 
 if __name__ == '__main__':
     from word2vec.dataset import Word2VecDataset
-    input_pipe = Word2VecDataset(filename = './data/sogou_news/corpus_new.txt',
-                                 model = 'SG',
-                                 window_size = 2,
+    input_pipe = Word2VecDataset(data_file = './data/sogou_news/corpus_new.txt',
+                                 dict_file = './data/sogou_news/dictionary.pkl',
                                  epochs = 10,
                                  batch_size =5,
+                                 min_count = 2,
+                                 sample_rate = 0.01,
                                  buffer_size = 128,
-                                 min_count=1,
-                                 sample_rate=0.01
+                                 model='CBOW',
+                                 window_size=2
                                  )
 
     input_pipe.build_dictionary()

@@ -1,31 +1,17 @@
 import tensorflow as tf
 
-from hierarchysoftmax import HierarchySoftmax
+from word2vec.hierarchysoftmax import HierarchySoftmax
 from utils import add_layer_summary
 from config.default_config import INVALID_INDEX
-
-def avg_pooling_embedding(embedding, features, params):
-    """
-    :param features: (batch, 2*window_size)
-    :param embedding: (vocab_size, emb_size)
-    :return: input_embedding : average pooling of context embedding
-    """
-    input_embedding= []
-    samples = tf.unstack(features, params['batch_size'])
-    for sample in samples:
-        sample = tf.boolean_mask(sample, tf.not_equal(sample, INVALID_INDEX), axis=0) # (real_size,)
-        tmp = tf.nn.embedding_lookup(embedding, sample) # (real_size, emb_size)
-        input_embedding.append(tf.reduce_mean(tmp, axis=0)) # (emb_size, )
-
-    input_embedding = tf.stack(input_embedding, name = 'input_embedding_vector') # batch * emb_size
-    return input_embedding
+from layers import avg_pooling_embedding
 
 
-def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vector, params):
+def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vector, params, stratify):
     """
     supported : sampled_loss, nce_loss
     train mode : binary classification
     eval mode : multi-class classification
+    stratify: only sample in the same category
     """
 
     if mode == tf.estimator.ModeKeys.TRAIN:

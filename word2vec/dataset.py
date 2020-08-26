@@ -1,61 +1,16 @@
-import tensorflow as tf
-import collections
-import os
 from config.default_config import INVALID_INDEX
+from BaseDataset import *
 
-class Word2VecDataset(object):
-    def __init__(self, filename, model, window_size, epochs, batch_size, buffer_size, min_count, sample_rate ):
-        self.filename = filename
+class Word2VecDataset(BaseDataset):
+    def __init__(self, data_file, dict_file, model, epochs, batch_size, buffer_size, min_count, window_size, sample_rate):
+        super(Word2VecDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count )
         self.model = model
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.buffer_size = buffer_size
         self.window_size = window_size
-        self.min_count = min_count
         self.sample_rate = sample_rate
-        self._dictionary = None
-        self.word_index = None
         self.param_check()
 
     def param_check(self):
         assert self.model in ['CBOW', 'SG'], 'For moedl only [CBOW | SG] are supported'
-
-    @property
-    def dictionary(self):
-        return self._dictionary
-
-    @property
-    def vocab_size(self):
-        return len(self._dictionary)
-
-    def build_dictionary(self):
-        """
-        dictionray: {char:frequency} order by descending frequency
-        word_index: {char:index} index is the above dictionary order
-        """
-        dictionary = collections.Counter()
-        with open(self.filename, 'r') as f:
-            for line in f:
-                dictionary.update(line.strip().split())
-
-        self._org_vocab_size = len(dictionary)
-
-        if self.min_count >0:
-            dictionary = dict([(i,j) for i,j in dictionary.items()  if j >= self.min_count  ])
-
-        self._dictionary = collections.OrderedDict( sorted(dictionary.items(), key = lambda x:x[1], reverse = True) )
-
-    def build_wordtable(self):
-        # word_frequency < self.min_count will be map to -1
-        with tf.name_scope('wordtable'):
-            return tf.lookup.StaticHashTable(
-                initializer = tf.lookup.KeyValueTensorInitializer(
-                    keys = list(self._dictionary.keys()),
-                    values = list(range(len(self._dictionary))),
-                    key_dtype = tf.string,
-                    value_dtype = tf.int64
-                ), default_value = INVALID_INDEX # all out of vocabulary will be map to INVALID_INDEX
-            )
 
     def build_sampletable(self):
         with tf.name_scope('sampletable'):
@@ -63,7 +18,7 @@ class Word2VecDataset(object):
                 initializer = tf.lookup.KeyValueTensorInitializer(
                     keys =  list(range(len(self._dictionary))),
                     values = [ 1- (self.sample_rate * self._org_vocab_size/i) **0.5 for i in self._dictionary.values() ],
-                    key_dtype = tf.int64,
+                    key_dtype = tf.int32,
                     value_dtype = tf.float32,
                 ), default_value = INVALID_INDEX # all out of vocabulary will be map to INVALID_INDEX
             )
@@ -73,7 +28,6 @@ class Word2VecDataset(object):
         return tf.boolean_mask(tensor = tokens,
                                mask = tf.less(sampletable.lookup(tokens),
                                               tf.random_uniform(shape = [tf.size(tokens)], minval = 0, maxval =1)))
-
     @staticmethod
     def window_slice_func(model, window_size):
         """
@@ -118,8 +72,8 @@ class Word2VecDataset(object):
 
             # Initialize variable
             step = tf.constant( 0 )
-            features = tf.TensorArray( dtype=tf.int64, size=sentence_length, infer_shape=False )
-            labels = tf.TensorArray( dtype=tf.int64, size=sentence_length, infer_shape=False )
+            features = tf.TensorArray( dtype=tf.int32, size=sentence_length, infer_shape=False )
+            labels = tf.TensorArray( dtype=tf.int32, size=sentence_length, infer_shape=False )
 
             # run window sliding through sentences(list of tokens)
             _, features, labels = tf.while_loop(
@@ -148,7 +102,7 @@ class Word2VecDataset(object):
             sampletable = self.build_sampletable()
             window_slice_func = Word2VecDataset.window_slice_func( self.model, self.window_size )
 
-            dataset = tf.data.TextLineDataset(self.filename).\
+            dataset = tf.data.TextLineDataset(self.data_file).\
                         map(lambda x: tf.string_split([tf.string_strip(x)]).values).\
                         map(lambda x: wordtable.lookup(x)). \
                         map( lambda x: tf.boolean_mask( x, tf.not_equal( x, INVALID_INDEX ) ) ). \
@@ -167,30 +121,27 @@ class Word2VecDataset(object):
             return dataset
         return input_fn
 
-
-
 if __name__ == '__main__':
     # test
-    input_pipe = Word2VecDataset(filename = './data/sogou_news/corpus_new.txt',
-                                 model = 'CBOW',
-                                 window_size = 2,
+    sess = tf.Session()
+    input_pipe = Word2VecDataset(data_file = './data/sogou_news/corpus_new.txt',
+                                 dict_file = './data/sogou_news/dictionary.pkl',
                                  epochs = 10,
                                  batch_size =5,
                                  min_count = 2,
                                  sample_rate = 0.01,
-                                 buffer_size = 128)
+                                 buffer_size = 128,
+                                 model='CBOW',
+                                 window_size=2
+                                 )
 
     input_pipe.build_dictionary()
-    print(input_pipe.dictionary)
+    input_fn = input_pipe.build_dataset()
+    dataset = input_fn()
 
-    func  = input_pipe.build_dataset()
-    dataset = func()
-
-    sess = tf.Session()
     iterator = tf.data.make_initializable_iterator(dataset)
-
+    sess.run(iterator.initializer)
     sess.run(tf.tables_initializer())
     sess.run(tf.global_variables_initializer())
-    sess.run(iterator.initializer)
 
     sess.run(iterator.get_next() )
