@@ -1,4 +1,4 @@
-INVALID_INDEX =-1
+INVALID_INDEX = -1
 
 CHECKPOINT_DIR = './checkpoint/{}_{}'
 

@@ -2,11 +2,10 @@ import tensorflow as tf
 
 from word2vec.hierarchysoftmax import HierarchySoftmax
 from utils import add_layer_summary
-from config.default_config import INVALID_INDEX
 from layers import avg_pooling_embedding
 
 
-def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vector, params, stratify):
+def negative_sampling(mode, output_embedding, bias, labels, input_embedding_vector, params):
     """
     supported : sampled_loss, nce_loss
     train mode : binary classification
@@ -90,9 +89,8 @@ def model_fn(features, labels, mode, params):
                                   initializer=tf.truncated_normal_initializer(), name='output_word_embedding' )
             b1 = tf.get_variable( shape=[params['vocab_size']],
                                   initializer=tf.random_uniform_initializer(), name='bias')
-        add_layer_summary( w0.name, w0)
-        add_layer_summary( w1.name, w1 )
-        add_layer_summary( b1.name, b1 )
+        for item in [w0, w1, b1]:
+            add_layer_summary(item.name, item)
 
     with tf.variable_scope('input_hidden'):
         # batch_size * emb_size

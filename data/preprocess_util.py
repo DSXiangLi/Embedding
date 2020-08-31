@@ -52,7 +52,7 @@ class StrUtils(object):
         return new_sentences
 
     def word_cut(self, sentences):
-        if self.language == 'zh':
+        if self.language == 'ch':
             func = lambda line: [i.strip() for i in jieba.cut(line, cut_all =False)]
         else:
             func = lambda line: line.split(" ")
@@ -74,8 +74,8 @@ class StrUtils(object):
 
 
     def multi_word_cut(self, sentences):
-
-        if self.language == 'zh':
+        print('Multiprocessing Word cut ')
+        if self.language == 'ch':
             def func(line):
                 line =  [i.strip() for i in jieba.cut(line, cut_all =False)]
                 return [i for i in line if ((not i.isdigit()) and (i not in self.stop_words )) ]

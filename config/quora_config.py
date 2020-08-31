@@ -13,13 +13,14 @@ TRAIN_PARAMS_UPDATE = {
                      'extra_features': [3]}, [1]),
     'padding_values': ({'tokens': INVALID_INDEX, 'extra_features': 0.0}, 0.0),
     'label_size': 1,
-    'batch_size': 256,
+    'batch_size': 1000,
     'decay_steps': 100000,
     'decay_rate': 0.95,
     'extra_size': 3,
+    'emb_size': 256,
     'extra_hidden_size': 2,
     'use_extra': True,
-    'ngram': 2
+    'ngram': 1
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)

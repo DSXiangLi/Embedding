@@ -20,17 +20,19 @@ def main(args):
 
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
+    INVALID_INDEX = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'INVALID_INDEX' )
 
     # Init dataset
     input_pipe = Word2VecDataset( data_file = data_file,
                                   dict_file = dict_file,
-                                  model= args.model,
                                   window_size= TRAIN_PARAMS['window_size'],
                                   epochs= TRAIN_PARAMS['epochs'],
                                   batch_size=TRAIN_PARAMS['batch_size'],
                                   buffer_size=TRAIN_PARAMS['buffer_size'],
+                                  invalid_index= INVALID_INDEX,
                                   min_count=TRAIN_PARAMS['min_count'],
-                                  sample_rate = TRAIN_PARAMS['sample_rate'])
+                                  sample_rate = TRAIN_PARAMS['sample_rate'],
+                                  model= args.model)
 
     input_pipe.build_dictionary()
 
@@ -50,7 +52,7 @@ def main(args):
     train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset() )
 
     eval_spec = tf.estimator.EvalSpec( input_fn = input_pipe.build_dataset(is_predict=1),
-                                       steps=200,
+                                       steps= 200,
                                        throttle_secs=60 )
 
     tf.estimator.train_and_evaluate( estimator, train_spec, eval_spec )

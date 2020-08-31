@@ -1,11 +1,10 @@
 import collections
 import tensorflow as tf
 import pickle
-from config.default_config import INVALID_INDEX
 
 import os
 class BaseDataset(object):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count):
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, invalid_index):
         self.data_file = data_file
         self.dict_file = dict_file
         self.epochs = epochs
@@ -14,6 +13,7 @@ class BaseDataset(object):
         self.min_count = min_count
         self._dictionary = None
         self.word_index = None
+        self.invalid_index = invalid_index
 
     @property
     def dictionary(self):
@@ -21,7 +21,7 @@ class BaseDataset(object):
 
     @property
     def vocab_size(self):
-        return len(self._dictionary)
+        return (len(self._dictionary) + 1)  # Leave place for 0 INVALID_INDEX
 
     def build_dictionary(self):
         """
@@ -40,15 +40,15 @@ class BaseDataset(object):
         self._dictionary = collections.OrderedDict( sorted(dictionary.items(), key = lambda x:x[1], reverse = True) )
 
     def build_wordtable(self):
-        # word_frequency < self.min_count will be map to -1
+        # word_frequency < self.min_count will be map to INVALID_INDEX
         with tf.name_scope('wordtable'):
             return tf.lookup.StaticHashTable(
                 initializer = tf.lookup.KeyValueTensorInitializer(
                     keys = list(self._dictionary.keys()),
-                    values = list(range(len(self._dictionary))),
+                    values = list(range(1, (len(self._dictionary)+1) )), # leaving 0 for INVALID_INDEX
                     key_dtype = tf.string,
                     value_dtype = tf.int32
-                ), default_value = INVALID_INDEX # all out of vocabulary will be map to INVALID_INDEX
+                ), default_value = self.invalid_index # all out of vocabulary will be map to INVALID_INDEX
             )
 
 

@@ -1,5 +1,6 @@
-
 from config.default_config import TRAIN_PARAMS
+
+INVALID_INDEX = -1
 
 TRAIN_PARAMS_UPDATE = {
     'window_size': 5,

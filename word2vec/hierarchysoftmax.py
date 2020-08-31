@@ -52,7 +52,7 @@ class HuffmanTree(object):
 
         heap_nodes = []
         for word_index, (char, freq) in enumerate(self.freq_dic.items()):
-            tmp = TreeNode( freq, char, word_index, is_leaf=True )
+            tmp = TreeNode( freq, char, word_index+1, is_leaf=True ) # add +1 because 0 is left for 0 INVALID_INDEX
             heapq.heappush(heap_nodes, tmp )
 
         while len(heap_nodes)>1:
@@ -141,6 +141,7 @@ if __name__ == '__main__':
                                  batch_size =5,
                                  min_count = 2,
                                  sample_rate = 0.01,
+                                 invalid_index = -1,
                                  buffer_size = 128,
                                  model='CBOW',
                                  window_size=2
