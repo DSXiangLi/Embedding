@@ -5,3 +5,14 @@ __pycache__/
 checkpoint/*
 data/sogou_news_big/news_sohusite_xml*
 data/sogou_news_big/corpus*
+data/sogou_news/corpus*
+data/sogou_news_big/*.pkl
+data/sogou_news/*.pkl
+data/quora/*.csv
+data/quora/*.pkl
+data/quora/*.tfrecords
+word2vec/*.ipynb
+checkpoint/*
+fasttext/.ipynb_checkpoints/*
+word2vec/.ipynb_checkpoints/*
+venv/*

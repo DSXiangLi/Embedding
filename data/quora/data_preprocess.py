@@ -94,11 +94,11 @@ class TFDump(object):
 if __name__ == '__main__':
     data_dir = 'data/quora'
 
-    preprocess = TFDump(data_dir, 'train', 'const', 'en', 2)
+    preprocess = TFDump(data_dir, 'train', 'const', 'en', 1)
     preprocess.execute(True)
 
     preprocess.dump_tokens() ##TODO: allow load data from mid-result and do extra feature engineering
 
     # Dump dictionary for single token & ngram
     dump_dictionary(data_dir, preprocess.tokens, '')
-    dump_dictionary(data_dir, preprocess.ngram_tokens, '2gram_')
+    dump_dictionary(data_dir, preprocess.ngram_tokens, '')

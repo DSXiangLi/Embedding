@@ -3,6 +3,7 @@ import tensorflow as tf
 import os
 
 from config.default_config import RUN_CONFIG
+from tensorboard import summary
 
 def clear_model(model_dir):
     try:
@@ -14,22 +15,27 @@ def clear_model(model_dir):
 
 
 def build_estimator(params, model_dir, model_fn, gpu_enable=0):
+    session_config = tf.ConfigProto()
+
     if gpu_enable:
-        session_config = tf.ConfigProto( log_device_placement=True,
-                                         device_count={'GPU': 0},
-                                         inter_op_parallelism_threads=0,
-                                         intra_op_parallelism_threads=0,
-                                         allow_soft_placement=True )
-        session_config.gpu_options.per_process_gpu_memory_fraction = 0.5
+        # control CPU and Mem usage
+        session_config.gpu_options.allow_growth = True
+        session_config.gpu_options.per_process_gpu_memory_fraction = 0.8
+        session_config.log_device_placement = True
+        session_config.allow_soft_placement = True
+        session_config.inter_op_parallelism_threads = 6
+        session_config.intra_op_parallelism_threads = 6
+        mirrored_strategy = tf.distribute.MirroredStrategy()
     else:
-        session_config = tf.ConfigProto()
+        mirrored_strategy = None
 
     run_config = tf.estimator.RunConfig(
         save_summary_steps=RUN_CONFIG['save_steps'],
         log_step_count_steps=RUN_CONFIG['log_steps'],
         keep_checkpoint_max=RUN_CONFIG['keep_checkpoint_max'],
         save_checkpoints_steps=RUN_CONFIG['save_steps'],
-        session_config=session_config
+        session_config=session_config,
+        train_distribute=mirrored_strategy, eval_distribute=None
     )
 
     estimator = tf.estimator.Estimator(
@@ -51,3 +57,18 @@ def write_projector_meta(log_dir, dictionary):
         f.write( "Index\tLabel\n" )
         for word_index, word in enumerate(dictionary.keys()):
             f.write("%d\t%s\n" % (word_index, word))
+
+def pr_summary_hook(logits, labels, num_threshold, output_dir, save_steps):
+    # add precision-recall curve summary
+    pr_summary = summary.pr_curve( name='pr_curve',
+                                   predictions=tf.sigmoid( logits ),
+                                   labels=tf.cast( labels, tf.bool ),
+                                   num_thresholds= num_threshold )
+
+    summary_hook = tf.train.SummarySaverHook(
+        save_steps= save_steps,
+        output_dir= output_dir,
+        summary_op=[pr_summary]
+    )
+
+    return summary_hook
