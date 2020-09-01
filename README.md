@@ -9,13 +9,20 @@ python data/sogou_news_big/data_preprocess.py
 
 python word2vec/main.py --model SG --train_algo HS  [Skip-gram Hierarchy Softmax]
 
+#### 2. fasttext classification demo
+python data/quora_fasttext/data_preprocess.py
+
+python fasttext/main.py --gpu 1 [allow using gpu in tf.estimator]
 
 ### Paper List 
 - [Word2Vec] Distributed Representations of Words and Phrases and their Compositionality (Google 2013)
 - [Word2Vec] Efficient Estimation of Word Representations in Vector Space (Google 2013)
-- [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
-- [Glove] Global Vectors for Word Representation (2014)
+- [Word2Vec] word2vec Explained: Deriving Mikolov et al.’s Negative-Sampling Word-Embedding Method (2014)
+- [Word2Vec] word2vec Parameter Learning Explained (2016)
 - [Fasttext] Enriching Word Vectors with Subword Information (Facebook 2017)
+- [Fasttext] [Fasttext]Bag of Tricks for Efficient Text Classification (Facebook 2016)
+- [Glove] Global Vectors for Word Representation (2014)
+- [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
 - [Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)
 - [DeepWalk] DeepWalk- Online Learning of Social Representations (SBU 2014)
 - [Node2vec] Node2vec - Scalable Feature Learning for Networks (Stanford 2016)
