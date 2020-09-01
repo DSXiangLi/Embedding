@@ -19,7 +19,7 @@ class StrUtils(object):
 
     @staticmethod
     def readline(file, lines):
-        with open( file ) as f:
+        with open( file ,encoding='UTF-8') as f:
             for line in f:
                 if len( line.strip() ) == 0:
                     continue
@@ -76,6 +76,9 @@ class StrUtils(object):
     def multi_word_cut(self, sentences):
         print('Multiprocessing Word cut ')
         if self.language == 'ch':
+            jieba.initialize() # initialize first, or it will initialize in each process
+            jieba.disable_parallel()
+
             def func(line):
                 line =  [i.strip() for i in jieba.cut(line, cut_all =False)]
                 return [i for i in line if ((not i.isdigit()) and (i not in self.stop_words )) ]
@@ -83,9 +86,11 @@ class StrUtils(object):
             def func(line):
                 return [i for i in line.split(" ") if ((not i.isdigit()) and (i not in self.stop_words))]
 
-        pool = Pool(processes = int(mp.cpu_count()*0.8))
+        pool = Pool(nodes = 5)
         t0 = time.time()
         word_cut = pool.map(func, sentences)
+        pool.close()
+        pool.join()
         print('MultiProcess  time {:.0f}'.format(time.time() - t0))
         return word_cut
 

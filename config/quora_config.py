@@ -1,6 +1,8 @@
 import tensorflow as tf
 from config.default_config import INVALID_INDEX, TRAIN_PARAMS
 
+INVALID_INDEX =0
+
 QUORA_PROTO = {
     'tokens': tf.VarLenFeature(tf.string),
     'ngram_tokens': tf.VarLenFeature(tf.string),

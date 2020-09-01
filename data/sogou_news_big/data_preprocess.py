@@ -7,7 +7,7 @@ def main(data_dir, const_dir, language):
 
     print('Reading Raw corpus in {}'.format(input_path))
     sentences = []
-    with open(input_path, 'r' ) as f:
+    with open(input_path, 'r' , encoding='UTF-8') as f:
         for line in f:
             sentences.append( line )
 
