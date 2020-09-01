@@ -5,8 +5,7 @@ __pycache__/
 checkpoint/*
 data/sogou_news_big/news_sohusite_xml*
 data/sogou_news_big/corpus*
-data/sogou_news/*.txt
-data/sogou_news/*.csv
+data/sogou_news/corpus*
 data/sogou_news_big/*.pkl
 data/sogou_news/*.pkl
 data/quora/*.csv
