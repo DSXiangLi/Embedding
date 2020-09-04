@@ -10,7 +10,8 @@ TRAIN_PARAMS = {
     'ng_sample': 25,
     'buffer_size':128,
     'min_count': 2,
-    'decay_steps':-1
+    'decay_steps':-1,
+    'invalid_index': INVALID_INDEX
 }
 
 

@@ -1,7 +1,7 @@
 import tensorflow as tf
 from config.default_config import INVALID_INDEX, TRAIN_PARAMS
 
-INVALID_INDEX =0
+INVALID_INDEX = 0
 
 QUORA_PROTO = {
     'tokens': tf.VarLenFeature(tf.string),
@@ -19,10 +19,19 @@ TRAIN_PARAMS_UPDATE = {
     'decay_steps': 100000,
     'decay_rate': 0.95,
     'extra_size': 3,
-    'emb_size': 256,
+    'emb_size': 200,
     'extra_hidden_size': 2,
     'use_extra': True,
-    'ngram': 1
+    'ngram': 1,
+    'invalid_index': INVALID_INDEX
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
+
+
+RUN_CONFIG = {
+    'summary_steps': 200,
+    'log_steps': 200,
+    'keep_checkpoint_max':1,
+    'save_steps': 200
+}

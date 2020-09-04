@@ -8,6 +8,7 @@ TRAIN_PARAMS_UPDATE = {
     'batch_size': 500,
     'epochs': 1000,
     'emb_size': 200,
+    'invalid_index': INVALID_INDEX
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)

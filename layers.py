@@ -1,5 +1,4 @@
 import tensorflow as tf
-from config.default_config import *
 
 def avg_pooling_embedding(embedding, features, params):
     """
@@ -10,7 +9,7 @@ def avg_pooling_embedding(embedding, features, params):
     input_embedding= []
     samples = tf.unstack(features, params['batch_size'])
     for sample in samples:
-        sample = tf.boolean_mask(sample, tf.not_equal(sample, INVALID_INDEX), axis=0) # (real_size,)
+        sample = tf.boolean_mask(sample, tf.not_equal(sample, params['invalid_index']), axis=0) # (real_size,)
         tmp = tf.nn.embedding_lookup(embedding, sample) # (real_size, emb_size)
         input_embedding.append(tf.reduce_mean(tmp, axis=0)) # (emb_size, )
 
@@ -18,16 +17,16 @@ def avg_pooling_embedding(embedding, features, params):
     return input_embedding
 
 
-def avg_pooling_embedding_v2(embedding, features):
+def avg_pooling_embedding_v2(embedding, features, params):
     """
     Allow Embedding for INVALID Index and apply weighting mask
-    :param features: (batch, 2*window_size)
+    :param features: (batch, padded_size)
     :param embedding: (vocab_size, emb_size)
     :return: input_embedding : average pooling of context embedding
     """
     input_embedding = tf.nn.embedding_lookup(embedding, features) # batch * padded_size * emb_size
 
-    zero_mask = tf.expand_dims(tf.equal(features, INVALID_INDEX), axis=2) # batch * padded_size * 1
+    zero_mask = tf.expand_dims(tf.equal(features, params['invalid_index']), axis=2) # batch * padded_size * 1
 
     weight = tf.where(zero_mask, tf.zeros_like(zero_mask, dtype=tf.float32), tf.ones_like(zero_mask, dtype = tf.float32)) # batch * padded_size *1
 
