@@ -20,6 +20,7 @@ def main(args):
 
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
+    RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'RUN_CONFIG' )
 
     # Init dataset
     input_pipe = Word2VecDataset( data_file = data_file,
@@ -46,7 +47,7 @@ def main(args):
     )
 
     # Init Estimator
-    estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn)
+    estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
     train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset() )
 
@@ -66,6 +67,7 @@ if __name__ == '__main__':
     parser.add_argument( '--step', type=str, help='train or predict', required=False, default = 'train' )
     parser.add_argument( '--clear_model', type=int, help= 'Whether to clear existing model', required=False, default=1)
     parser.add_argument( '--data', type=str, help='which data to use[data should be list of to -kenized string]', required=False, default='sogou_news')
+    parser.add_argument('--gpu', type =int, help = 'Whether to enable gpu', required =False, default = 0 )
     args = parser.parse_args()
 
     main(args)

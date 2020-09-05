@@ -25,7 +25,7 @@ def model_fn(features, labels, mode, params):
             add_layer_summary(item.name, item)
 
     with tf.variable_scope('hidden_layer'):
-        dense = avg_pooling_embedding_v2( embedding, tokens)  # batch_size * emb_size
+        dense = avg_pooling_embedding_v2( embedding, tokens, params)  # batch_size * emb_size
         add_layer_summary(dense.name, dense)
 
         if params['use_extra']:
@@ -60,7 +60,7 @@ def model_fn(features, labels, mode, params):
         else:
             learning_rate = params['learning_rate']
 
-        optimizer = tf.train.AdagradOptimizer( learning_rate = learning_rate)
+        optimizer = tf.train.AdamOptimizer( learning_rate = learning_rate)
 
         with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
             train_op = optimizer.minimize(cross_entropy, global_step = tf.train.get_global_step())

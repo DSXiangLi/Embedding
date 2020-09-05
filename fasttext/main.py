@@ -8,6 +8,7 @@ from utils import clear_model, build_estimator
 from fasttext.dataset import FasttextDataset
 from config.default_config import CHECKPOINT_DIR
 
+
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.data, args.model)
@@ -19,7 +20,7 @@ def main(args):
 
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
-    INVALID_INDEX = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'INVALID_INDEX' )
+    RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'RUN_CONFIG' )
 
     # Init dataset
     input_pipe = FasttextDataset(data_file = data_file,
@@ -28,10 +29,11 @@ def main(args):
                                  batch_size = TRAIN_PARAMS['batch_size'],
                                  min_count = TRAIN_PARAMS['min_count'],
                                  buffer_size = TRAIN_PARAMS['buffer_size'],
-                                 invalid_index = INVALID_INDEX,
+                                 invalid_index = TRAIN_PARAMS['invalid_index'],
                                  padded_shape = TRAIN_PARAMS['padded_shape'],
                                  padding_values = TRAIN_PARAMS['padding_values'],
                                  ngram = TRAIN_PARAMS['ngram']
+
                                  )
     input_pipe.build_dictionary()
 
@@ -45,7 +47,7 @@ def main(args):
 
     # Init Estimator
     model_fn = getattr(importlib.import_module('model_{}'.format(args.model)), 'model_fn')
-    estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu)
+    estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
     if args.step == 'train':
         early_stopping = tf.estimator.experimental.stop_if_no_decrease_hook(

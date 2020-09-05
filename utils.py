@@ -2,8 +2,9 @@ import shutil
 import tensorflow as tf
 import os
 
-from config.default_config import RUN_CONFIG
 from tensorboard import summary
+from tensorflow.python.client import device_lib
+
 
 def clear_model(model_dir):
     try:
@@ -14,7 +15,7 @@ def clear_model(model_dir):
         print( '{} model cleaned'.format(model_dir) )
 
 
-def build_estimator(params, model_dir, model_fn, gpu_enable=0):
+def build_estimator(params, model_dir, model_fn, gpu_enable, RUN_CONFIG):
     session_config = tf.ConfigProto()
 
     if gpu_enable:
@@ -25,7 +26,7 @@ def build_estimator(params, model_dir, model_fn, gpu_enable=0):
         session_config.allow_soft_placement = True
         session_config.inter_op_parallelism_threads = 6
         session_config.intra_op_parallelism_threads = 6
-        mirrored_strategy = tf.distribute.MirroredStrategy()
+        mirrored_strategy = tf.distribute.MirroredStrategy(RUN_CONFIG['devices'])
     else:
         mirrored_strategy = None
 
@@ -72,3 +73,8 @@ def pr_summary_hook(logits, labels, num_threshold, output_dir, save_steps):
     )
 
     return summary_hook
+
+
+def get_available_gpus():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']

@@ -45,11 +45,12 @@ class FasttextDataset( BaseDataset ):
             word_table_lookup = FasttextDataset.word_table_lookup(self.build_wordtable())
             parser = FasttextDataset.parse_example(self.ngram)
 
-            dataset = tf.data.TFRecordDataset( self.data_file). \
+            dataset = tf.data.TFRecordDataset( self.data_file).\
                 map( lambda x: parser( x ) ). \
                 map( lambda features, label: word_table_lookup( features, label ) ). \
                 filter( lambda features, label: tf.greater( tf.size(
-                            tf.boolean_mask( features['tokens'], tf.not_equal( features['tokens'], self.invalid_index ) ) ), 1) )
+                            tf.boolean_mask(
+                                features['tokens'], tf.not_equal( features['tokens'], self.invalid_index ) ) ), 1) )
             if not is_predict:
                 dataset = dataset \
                     .shuffle(self.buffer_size ) \

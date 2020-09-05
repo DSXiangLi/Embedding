@@ -1,4 +1,4 @@
-from config.default_config import TRAIN_PARAMS
+from config.default_config import  TRAIN_PARAMS, RUN_CONFIG
 
 INVALID_INDEX = -1
 
