@@ -4,13 +4,17 @@
 
 #### 1. Word2vec demo 
 bash data/sogou_news_big/extract_file.sh
-
 python word2vec/main.py --model SG --train_algo HS  [Skip-gram Hierarchy Softmax]
 
 #### 2. fasttext classification demo
 python data/quora_fasttext/data_preprocess.py
-
 python fasttext/main.py --gpu 1 [allow using gpu in tf.estimator]
+
+#### 3. Doc2vec Demo and Comparison with Word2vec
+bash data/sogou_news_big/extract_file.sh
+bash doc2vec/model_run.sh
+doc2vec/doc2vec_vs_word2vec_sogou.ipynb
+
 
 ### Paper List 
 - [Word2Vec] Distributed Representations of Words and Phrases and their Compositionality (Google 2013)
