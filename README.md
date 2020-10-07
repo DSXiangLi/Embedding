@@ -29,6 +29,10 @@ Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 - [Fasttext] [Fasttext]Bag of Tricks for Efficient Text Classification (Facebook 2016)
 - [Glove] Global Vectors for Word Representation (2014)
 - [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
+- [Doc2vec] Skip-Thought Vectors (2015)
+- [Doc2vec] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
+- [Doc2vec] A SIMPLE BUT TOUGH-TO-BEAT BASELINE FOR SEN- TENCE EMBEDDINGS (2017)
+- [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
 - [Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)
 - [DeepWalk] DeepWalk- Online Learning of Social Representations (SBU 2014)
 - [Node2vec] Node2vec - Scalable Feature Learning for Networks (Stanford 2016)
@@ -37,5 +41,6 @@ Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 - [LSH] Locality-Sensitive Hashing for Finding Nearest Neighbors (2008)
 
 ### Blog 
-- 无所不能的Embedding 1 - Word2vec模型详解&代码实现 https://www.cnblogs.com/gogoSandy/p/13418257.html
-- 无所不能的Embedding 2. FastText词向量&文本分类 https://www.cnblogs.com/gogoSandy/p/13618077.html
+- 无所不能的Embedding1 - Word2vec模型详解&代码实现 https://www.cnblogs.com/gogoSandy/p/13418257.html
+- 无所不能的Embedding2 - FastText词向量&文本分类 https://www.cnblogs.com/gogoSandy/p/13618077.html
+- 无所不能的Embedding3 - word2vec->Doc2vec[PV-DM/PV-DBOW] https://www.cnblogs.com/gogoSandy/p/13773327.html
