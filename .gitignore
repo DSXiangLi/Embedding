@@ -9,10 +9,16 @@ data/sogou_news/corpus*
 data/sogou_news_big/*.pkl
 data/sogou_news/*.pkl
 data/quora/*.csv
+data/quora/*.txt
 data/quora/*.pkl
 data/quora/*.tfrecords
+data/weibo_sentiment/*.txt
+data/instacart/*.csv
 word2vec/*.ipynb
 checkpoint/*
 fasttext/.ipynb_checkpoints/*
 word2vec/.ipynb_checkpoints/*
+doc2vec/.ipynb_checkpoints/*
 venv/*
+data/bookcorpus/out_txts/*
+data/*.txt

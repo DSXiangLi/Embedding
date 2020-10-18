@@ -1,0 +1,3 @@
+[submodule "bookcorpus"]
+	path = bookcorpus
+	url = git@github.com:soskek/bookcorpus.git

@@ -91,6 +91,7 @@ class StrUtils(object):
         word_cut = pool.map(func, sentences)
         pool.close()
         pool.join()
+        pool.clear()
         print('MultiProcess  time {:.0f}'.format(time.time() - t0))
         return word_cut
 
