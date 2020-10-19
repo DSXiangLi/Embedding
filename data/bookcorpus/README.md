@@ -1,6 +1,5 @@
 # This data is crawled using below code 
 
-如果
 
 ```
 @misc{soskkobayashi2018bookcorpus,
