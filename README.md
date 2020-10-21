@@ -38,7 +38,7 @@ Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
-- [Bert] Well Read Students Learn Better On the Importance of Pretraining Compact Models（Google 2019)
+- [Bert] Pre-training of Deep Bidirectional Transformers for Language Understanding（Google 2019)
 - [Sentence-BERT] Sentence Embeddings using Siamese BERT-Networks (2019)
 #### 物品向量
 - [Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)
