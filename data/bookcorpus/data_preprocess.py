@@ -48,5 +48,5 @@ def main(data_dir, const_dir, language):
 
 
 if __name__ == '__main__':
-    main( 'data/sogou_news', 'const', 'ch' )
+    main( 'data/bookcorpus', 'const', 'ch' )
 
