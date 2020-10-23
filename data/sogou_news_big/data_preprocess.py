@@ -5,14 +5,12 @@ def main(data_dir, const_dir, language):
     input_path = '{}/corpus.txt'.format( data_dir )
     output_path = '{}/corpus_new.txt'.format( data_dir )
 
+    preprocess = StrUtils(os.path.join(const_dir, language), language)
+
     print('Reading Raw corpus in {}'.format(input_path))
-    sentences = []
-    with open(input_path, 'r' , encoding='UTF-8') as f:
-        for line in f:
-            sentences.append( line )
+    sentences = preprocess.readline(input_path)
 
     print('String Preprocessing and word Segmentation')
-    preprocess = StrUtils(os.path.join(const_dir, language), language)
     sentences = preprocess.text_cleaning(sentences)
     sentences = preprocess.multi_word_cut(sentences)
 

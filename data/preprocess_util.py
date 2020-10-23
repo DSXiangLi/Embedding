@@ -18,22 +18,23 @@ class StrUtils(object):
         self.language = language
 
     @staticmethod
-    def readline(file, lines):
+    def readline(file):
+        lines = []
         with open( file ,encoding='UTF-8') as f:
             for line in f:
                 if len( line.strip() ) == 0:
                     continue
-                lines.append( line.strip() )
+                lines.append( line.strip().lower() )
         return lines
 
     @property
     def stop_words(self):
-        return StrUtils.readline(self.stopwords_file, [])
+        return StrUtils.readline(self.stopwords_file)
 
     @property
     def re_puncts(self):
         # chinese puncts
-        puncts = StrUtils.readline(self.puncts_file, [])
+        puncts = StrUtils.readline(self.puncts_file)
         # english puncts
         for p in list(string.punctuation):
             if p !='.':
@@ -63,8 +64,12 @@ class StrUtils(object):
         for line in tqdm(sentences):
             try:
                 words = func(line)
-                words = [i for i in words if ((not i.isdigit()) and (i not in self.stop_words )) ]
-                word_cut.append(words)
+                if self.language =='ch':
+                    words = [i for i in words if ((not i.isdigit()) and (i not in self.stop_words ) ) ]
+                else:
+                    words = [i for i in words if ((not i.isdigit()) and (i not in self.stop_words ) and (len(i)>1) ) ]
+                if len(words) >1:
+                    word_cut.append(words)
             except Exception as e:
                 print(line)
                 print(e)
@@ -108,7 +113,9 @@ class StrUtils(object):
             return tokens
 
 
-def dump_dictionary(output_path, sentences, prefix = ''):
-    dict = collections.Counter(itertools.chain(*sentences))
+def dump_dictionary(output_path, sentences, prefix = '', debug=False):
+    dict = collections.Counter(itertools.chain.from_iterable(sentences))
     with open('{}/{}dictionary.pkl'.format(output_path, prefix), 'wb') as f:
         pickle.dump(dict, f )
+    if debug:
+        print(list(dict.most_common(10)))
