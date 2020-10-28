@@ -1,14 +1,8 @@
 import tensorflow as tf
 from config.default_config import  TRAIN_PARAMS, RUN_CONFIG, MyWordSpecialToken
-from utils import get_available_gpus
 
-ALL_DEVICES = get_available_gpus()
-NUM_DEVICES = 2
 
 MySpecialToken = MyWordSpecialToken
-
-if len(ALL_DEVICES) > NUM_DEVICES:
-    ALL_DEVICES = ALL_DEVICES[:NUM_DEVICES]
 
 
 TF_PROTO = {
@@ -20,7 +14,6 @@ TF_PROTO = {
 
 TRAIN_PARAMS_UPDATE = {
     'label_size': 1,
-    'batch_size': 1000 * NUM_DEVICES,
     'decay_steps': 100000,
     'decay_rate': 0.95,
     'extra_size': 3,
@@ -33,7 +26,6 @@ TRAIN_PARAMS_UPDATE = {
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
 
 RUN_CONFIG_UPDATE = {
-    'devices': ALL_DEVICES,
     'summary_steps': 200,
     'log_steps': 200,
     'keep_checkpoint_max':1,

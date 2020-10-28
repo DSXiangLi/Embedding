@@ -2,15 +2,15 @@
 
 PARAMS = {'dm': 1,
           'vector_size': 100,
-        'window_size': 3,
-        'min_count':2,
-        'alpha':0.01,
-        'min_alpha':0.001,
-        'seed':1234,
-        'hierarchy_softmax': 1,
-        'negative_sampling':0,
-        'workers': 4,
-        'epochs':50
+          'window_size': 3,
+          'min_count':2,
+          'alpha':0.01,
+          'min_alpha':0.001,
+          'seed':1234,
+          'hierarchy_softmax': 1,
+          'negative_sampling':0,
+          'workers': 4,
+          'epochs':50
 }
 
 WV_PARAMS = PARAMS.copy()
