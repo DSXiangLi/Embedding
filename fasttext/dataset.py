@@ -93,7 +93,7 @@ if __name__ == '__main__':
                                  buffer_size = 128,
                                  special_token = MySpecialToken,
                                  ngram = 1,
-                                 tf_proto = QUORA_PROTO
+                                 tf_proto =TF_PROTO
                                  )
     input_pipe.build_dictionary()
     input_fn = input_pipe.build_dataset()
