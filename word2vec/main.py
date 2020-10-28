@@ -9,6 +9,7 @@ from config.default_config import CHECKPOINT_DIR
 #import sys
 #sys.path.append('/Users/xiangli/Desktop/Embedding/word2vec')
 
+
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.model, args.train_algo)
@@ -21,6 +22,7 @@ def main(args):
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
     RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'RUN_CONFIG' )
+    MySpecialToken = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'MySpecialToken' )
 
     # Init dataset
     input_pipe = Word2VecDataset( data_file = data_file,
@@ -29,7 +31,7 @@ def main(args):
                                   epochs= TRAIN_PARAMS['epochs'],
                                   batch_size=TRAIN_PARAMS['batch_size'],
                                   buffer_size=TRAIN_PARAMS['buffer_size'],
-                                  invalid_index= TRAIN_PARAMS['invalid_index'],
+                                  special_token= MySpecialToken,
                                   min_count=TRAIN_PARAMS['min_count'],
                                   sample_rate = TRAIN_PARAMS['sample_rate'],
                                   model= args.model)
@@ -38,8 +40,9 @@ def main(args):
 
     TRAIN_PARAMS.update(
         {
-            'vocab_size': input_pipe.vocab_size,
+            'vocab_size': input_pipe.total_size,
             'freq_dict': input_pipe.dictionary,
+            'pad_index': input_pipe.pad_index,
             'train_algo': args.train_algo,
             'loss': args.loss,
             'model': args.model

@@ -1,9 +1,11 @@
 from BaseDataset import *
 
+
 class Word2VecDataset(BaseDataset):
     def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count,
-                 invalid_index, window_size, sample_rate, model):
-        super(Word2VecDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count, invalid_index )
+                 special_token, window_size, sample_rate, model):
+        super(Word2VecDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
+                                              special_token)
         self.model = model
         self.window_size = window_size
         self.sample_rate = sample_rate
@@ -13,15 +15,19 @@ class Word2VecDataset(BaseDataset):
         assert self.model in ['CBOW', 'SG'], 'For moedl only [CBOW | SG] are supported'
 
     def build_sampletable(self):
-        with tf.name_scope('sampletable'):
-            return tf.lookup.StaticHashTable(
-                initializer = tf.lookup.KeyValueTensorInitializer(
-                    keys =  list(range(1, (len(self._dictionary)+1))),
-                    values = [ 1- (self.sample_rate * self._org_vocab_size/i) **0.5 for i in self._dictionary.values() ],
-                    key_dtype = tf.int32,
-                    value_dtype = tf.float32,
-                ), default_value = self.invalid_index # all out of vocabulary will be map to INVALID_INDEX
-            )
+        logging.info('Building Sample table')
+
+        sample_table = tf.lookup.StaticHashTable(
+            initializer = tf.lookup.KeyValueTensorInitializer(
+                keys =  list(range(self.vocab_size)),
+                values = [ 1- (self.sample_rate * self.vocab_size/i) **0.5 for i in self.vocab_dictionary.values() ],
+                key_dtype = tf.int32,
+                value_dtype = tf.float32,
+            ), default_value = 1 # Don't sample Special Token
+            , name = 'sample_table'
+        )
+
+        return sample_table
 
     @staticmethod
     def subsample(tokens, sampletable):
@@ -63,7 +69,7 @@ class Word2VecDataset(BaseDataset):
                     label = tf.expand_dims( center_word, axis=0 ) # (1,1)
                     feature = tf.expand_dims(
                         tf.pad( context_words, paddings=[[0, 2 * self.window_size - tf.size( context_words )]],
-                                mode='CONSTANT', constant_values= self.invalid_index ), axis=0 )  # (1, 2*window_size)
+                                mode='CONSTANT', constant_values= self.pad_index), axis=0 )  # (1, 2*window_size)
                 else:
                     label = tf.expand_dims( context_words, axis=1 )  # (2* window_size,1)
                     feature = tf.fill( dims= tf.shape(context_words), value=center_word[0] )  # (2* window_size,  )
@@ -87,6 +93,20 @@ class Word2VecDataset(BaseDataset):
 
         return helper
 
+    @staticmethod
+    def parse_example(line):
+
+        tokens = tf.string_split( [tf.string_strip( line )] ).values
+
+        return tokens
+
+    @staticmethod
+    def sample_filter_logic(line):
+
+        filter = tf.greater(tf.size(line), 2)
+
+        return filter
+
     def build_dataset(self, is_predict=0):
         """
         dataset is generated in following steps:
@@ -103,11 +123,10 @@ class Word2VecDataset(BaseDataset):
             window_slice_func = self.window_slice_func()
 
             dataset = tf.data.TextLineDataset(self.data_file).\
-                        map(lambda x: tf.string_split([tf.string_strip(x)]).values).\
+                        map(lambda x: Word2VecDataset.parse_example(x)). \
                         map(lambda x: wordtable.lookup(x)). \
                         map(lambda x: Word2VecDataset.subsample(x, sampletable)). \
-                        map( lambda x: tf.boolean_mask( x, tf.not_equal( x, self.invalid_index ) ) ). \
-                        filter( lambda x: tf.greater( tf.size( x ), 2 ) ).\
+                        filter(Word2VecDataset.sample_filter_logic).\
                         map( lambda x: window_slice_func( x ) ).\
                         flat_map( lambda features, label: tf.data.Dataset.from_tensor_slices( (features, label) ) )
 
@@ -121,15 +140,17 @@ class Word2VecDataset(BaseDataset):
             return dataset
         return input_fn
 
+
 if __name__ == '__main__':
     # test
     sess = tf.Session()
+    from config.sogou_news_config import MySpecialToken
     input_pipe = Word2VecDataset(data_file = './data/sogou_news/corpus_new.txt',
                                  dict_file = './data/sogou_news/dictionary.pkl',
                                  epochs = 10,
                                  batch_size =5,
                                  min_count = 2,
-                                 invalid_index=-1,
+                                 special_token=MySpecialToken,
                                  buffer_size = 128,
                                  window_size=2,
                                  sample_rate=0.01,
@@ -144,5 +165,4 @@ if __name__ == '__main__':
     sess.run(iterator.initializer)
     sess.run(tf.tables_initializer())
     sess.run(tf.global_variables_initializer())
-
     sess.run(iterator.get_next() )

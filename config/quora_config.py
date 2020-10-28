@@ -1,17 +1,17 @@
 import tensorflow as tf
-from config.default_config import  TRAIN_PARAMS, RUN_CONFIG
+from config.default_config import  TRAIN_PARAMS, RUN_CONFIG, MyWordSpecialToken
 from utils import get_available_gpus
 
-
-INVALID_INDEX = 0
 ALL_DEVICES = get_available_gpus()
 NUM_DEVICES = 2
+
+MySpecialToken = MyWordSpecialToken
 
 if len(ALL_DEVICES) > NUM_DEVICES:
     ALL_DEVICES = ALL_DEVICES[:NUM_DEVICES]
 
 
-QUORA_PROTO = {
+TF_PROTO = {
     'tokens': tf.VarLenFeature(tf.string),
     'ngram_tokens': tf.VarLenFeature(tf.string),
     'target': tf.FixedLenFeature([], tf.float32),
@@ -19,9 +19,6 @@ QUORA_PROTO = {
 }
 
 TRAIN_PARAMS_UPDATE = {
-    'padded_shape': ({'tokens': [None],
-                     'extra_features': [3]}, [1]),
-    'padding_values': ({'tokens': INVALID_INDEX, 'extra_features': 0.0}, 0.0),
     'label_size': 1,
     'batch_size': 1000 * NUM_DEVICES,
     'decay_steps': 100000,
@@ -30,12 +27,10 @@ TRAIN_PARAMS_UPDATE = {
     'emb_size': 200,
     'extra_hidden_size': 2,
     'use_extra': True,
-    'ngram': 1,
-    'invalid_index': INVALID_INDEX
+    'ngram': 1
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
-
 
 RUN_CONFIG_UPDATE = {
     'devices': ALL_DEVICES,
@@ -44,6 +39,5 @@ RUN_CONFIG_UPDATE = {
     'keep_checkpoint_max':1,
     'save_steps': 200
 }
-
 
 RUN_CONFIG.update(RUN_CONFIG_UPDATE)

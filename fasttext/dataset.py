@@ -1,18 +1,14 @@
 from BaseDataset import *
-from config.quora_config import QUORA_PROTO
-from config.default_config import *
 
 class FasttextDataset( BaseDataset ):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, invalid_index, padded_shape, padding_values, ngram):
-        super( FasttextDataset, self ).__init__( data_file, dict_file, epochs, batch_size, buffer_size, min_count, invalid_index)
-        self.padded_shape = padded_shape
-        self.padding_values = padding_values
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, special_token, ngram, tf_proto):
+        super( FasttextDataset, self ).__init__( data_file, dict_file, epochs, batch_size, buffer_size, min_count, special_token)
         self.ngram = ngram
+        self.tf_proto = tf_proto
 
-    @staticmethod
-    def parse_example(ngram):
+    def parse_example(ngram, tf_proto):
         def helper(line):
-            features = tf.parse_single_example(line, features = QUORA_PROTO)
+            features = tf.parse_single_example(line, features = tf_proto)
 
             if ngram == 1:
                 features['tokens'] = tf.sparse_tensor_to_dense(features['tokens'], default_value='')
@@ -25,6 +21,17 @@ class FasttextDataset( BaseDataset ):
             return features, target
         return helper
 
+    @property
+    def padded_shape(self):
+        return {'tokens': [None], 'extra_features': [3]}, [1]
+
+    @property
+    def padding_values(self):
+        """
+        padding value for sequence is the id for <PAD>
+        """
+        return {'tokens': self.pad_index, 'extra_features': 0.0}, 0.0
+
     @staticmethod
     def word_table_lookup(word_table):
         def helper(features, label ):
@@ -32,7 +39,16 @@ class FasttextDataset( BaseDataset ):
             return features, label
         return helper
 
-    def build_dataset(self, is_predict):
+    def sample_filter_logic(self, features, labels):
+        Filter = \
+        tf.greater(
+            tf.size(
+                tf.boolean_mask( features['tokens'],
+                                 tf.not_equal( features['tokens'], self.pad_index) )
+        ), 1 )
+        return Filter
+
+    def build_dataset(self, is_predict=0):
         """
         dataset is generated in following steps:
         1. sentence split into list of words
@@ -43,14 +59,13 @@ class FasttextDataset( BaseDataset ):
         """
         def input_fn():
             word_table_lookup = FasttextDataset.word_table_lookup(self.build_wordtable())
-            parser = FasttextDataset.parse_example(self.ngram)
+            parser = FasttextDataset.parse_example(self.ngram, self.tf_proto)
 
             dataset = tf.data.TFRecordDataset( self.data_file).\
                 map( lambda x: parser( x ) ). \
                 map( lambda features, label: word_table_lookup( features, label ) ). \
-                filter( lambda features, label: tf.greater( tf.size(
-                            tf.boolean_mask(
-                                features['tokens'], tf.not_equal( features['tokens'], self.invalid_index ) ) ), 1) )
+                filter(self.sample_filter_logic)
+
             if not is_predict:
                 dataset = dataset \
                     .shuffle(self.buffer_size ) \
@@ -68,28 +83,25 @@ class FasttextDataset( BaseDataset ):
 
 
 if __name__ == '__main__':
+    from config.quora_config import *
 
-    input_pipe = FasttextDataset(data_file = './data/quora/train_2gram.tfrecords',
-                                 dict_file = './data/quora/2gram_dictionary.pkl', #use ngram dictinoary accordingly
+    input_pipe = FasttextDataset(data_file = './data/quora/train.tfrecords',
+                                 dict_file = './data/quora/dictionary.pkl', #use ngram dictinoary accordingly
                                  epochs = 10,
                                  batch_size =5,
                                  min_count = 2,
                                  buffer_size = 128,
-                                 invalid_index = 0,
-                                 padded_shape = ({'tokens': [None],
-                                                 'extra_features': [3]}, [1]),
-                                 padding_values = ({'tokens': INVALID_INDEX, 'extra_features':0.0}, 0.0),
-                                 ngram = 2
+                                 special_token = MySpecialToken,
+                                 ngram = 1,
+                                 tf_proto = QUORA_PROTO
                                  )
     input_pipe.build_dictionary()
-    input_fn = input_pipe.build_dataset(False)
+    input_fn = input_pipe.build_dataset()
     dataset = input_fn()
 
     sess = tf.Session()
+    iterator = tf.data.make_initializable_iterator( dataset )
     sess.run(tf.global_variables_initializer())
     sess.run(tf.tables_initializer())
-
-    iterator = tf.data.make_initializable_iterator(dataset)
     sess.run(iterator.initializer)
-
     sess.run(iterator.get_next())

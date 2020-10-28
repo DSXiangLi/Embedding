@@ -21,6 +21,8 @@ def main(args):
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
     RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'RUN_CONFIG' )
+    MySpecialToken = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'MySpecialToken')
+    TF_PROTO = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'TF_PROTO')
 
     # Init dataset
     input_pipe = FasttextDataset(data_file = data_file,
@@ -29,18 +31,17 @@ def main(args):
                                  batch_size = TRAIN_PARAMS['batch_size'],
                                  min_count = TRAIN_PARAMS['min_count'],
                                  buffer_size = TRAIN_PARAMS['buffer_size'],
-                                 invalid_index = TRAIN_PARAMS['invalid_index'],
-                                 padded_shape = TRAIN_PARAMS['padded_shape'],
-                                 padding_values = TRAIN_PARAMS['padding_values'],
-                                 ngram = TRAIN_PARAMS['ngram']
-
+                                 special_token = MySpecialToken,
+                                 ngram = TRAIN_PARAMS['ngram'],
+                                 tf_proto = TF_PROTO
                                  )
     input_pipe.build_dictionary()
 
     TRAIN_PARAMS.update(
         {
-            'vocab_size': input_pipe.vocab_size,
+            'vocab_size': input_pipe.total_size,
             'freq_dict': input_pipe.dictionary,
+            'pad_index': input_pipe.pad_index,
             'model_dir': model_dir
         }
     )
@@ -69,6 +70,7 @@ def main(args):
         prediction = estimator.predict( input_fn = input_pipe.build_dataset(is_predict=1))
         with open('prediction.pkl', 'wb') as f:
             pickle.dump(prediction, f)
+
 
 if __name__ == '__main__':
     tf.logging.set_verbosity( tf.logging.ERROR )

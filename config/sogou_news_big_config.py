@@ -1,4 +1,4 @@
-from config.default_config import  TRAIN_PARAMS, RUN_CONFIG
+from config.default_config import TRAIN_PARAMS, MyWordSpecialToken, RUN_CONFIG
 INVALID_INDEX = -1
 
 TRAIN_PARAMS_UPDATE = {
@@ -7,7 +7,9 @@ TRAIN_PARAMS_UPDATE = {
     'batch_size': 500,
     'epochs': 1000,
     'emb_size': 200,
-    'invalid_index': INVALID_INDEX
+    'special_index': [INVALID_INDEX]
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
+
+MySpecialToken = MyWordSpecialToken

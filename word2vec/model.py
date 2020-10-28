@@ -64,7 +64,7 @@ def model_fn(features, labels, mode, params):
 
     if params['train_algo'] == 'HS':
         # If Hierarchy Softmax is used, initialize a huffman tree first
-        hstree = HierarchySoftmax( params['freq_dict'] )
+        hstree = HierarchySoftmax( params['freq_dict'], params['pad_index'] )
         hstree.build_tree()
         hstree.traverse()
         hstree.convert2tensor()
@@ -111,7 +111,7 @@ def model_fn(features, labels, mode, params):
                                      input_embedding_vector =input_embedding_vector,
                                      params = params)
 
-    optimizer = tf.train.AdagradOptimizer( learning_rate = params['learning_rate'] )
+    optimizer = tf.train.AdamOptimizer( learning_rate = params['learning_rate'] )
     update_ops = tf.get_collection( tf.GraphKeys.UPDATE_OPS )
 
     with tf.control_dependencies( update_ops ):

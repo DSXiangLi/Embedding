@@ -1,9 +1,11 @@
 import heapq
 import tensorflow as tf
-from config.default_config import INVALID_INDEX
+from config.default_config import MyWordSpecialToken
+
 
 class TreeNode(object):
     total_node = 0
+
     def __init__(self, frequency, char = None , word_index = None, is_leaf = False):
         self.frequency = frequency
         self.char = char # word character
@@ -27,12 +29,14 @@ class TreeNode(object):
         else:
             return 'Inner Node [{}] freq = {}'.format(self.node_index, self.frequency)
 
+
 class HuffmanTree(object):
-    def __init__(self, freq_dic):
+    def __init__(self, freq_dic, pad_index):
         self.nodes = []
         self.root = None
         self.max_depth = None
         self.freq_dic = freq_dic
+        self.pad_index = pad_index
         self.all_paths = {}
         self.all_codes = {}
         self.node_index = 0
@@ -85,19 +89,18 @@ class HuffmanTree(object):
         self.max_depth = max([len(i) for i in self.all_codes.values()])
 
 
-
 class HierarchySoftmax(HuffmanTree):
-    def __init__(self, freq_dic):
-        super(HierarchySoftmax, self).__init__(freq_dic)
+    def __init__(self, freq_dic, pad_index):
+        super(HierarchySoftmax, self).__init__(freq_dic, pad_index)
 
     def convert2tensor(self):
         # padded to max_depth and convert to tensor
         with tf.name_scope('hstree_code'):
-            self.code_table = tf.convert_to_tensor([ code + [INVALID_INDEX] * (self.max_depth - len(code)) for word, code
+            self.code_table = tf.convert_to_tensor([ code + [self.pad_index] * (self.max_depth - len(code)) for word, code
                                                      in sorted( self.all_codes.items(),  key=lambda x: x[0] )],
                                                    dtype = tf.float32)
         with tf.name_scope('hstree_path'):
-            self.path_table = tf.convert_to_tensor([path + [INVALID_INDEX] * (self.max_depth - len(path)) for word, path
+            self.path_table = tf.convert_to_tensor([path + [self.pad_index] * (self.max_depth - len(path)) for word, path
                                                     in sorted( self.all_paths.items(), key=lambda x: x[0] )],
                                                    dtype = tf.int32)
 
@@ -118,8 +121,9 @@ class HierarchySoftmax(HuffmanTree):
             path = self.path_table[tf.squeeze(label)]#  (max_depth,)
             code = self.code_table[tf.squeeze(label)] # (max_depth,)
 
-            path = tf.boolean_mask(path, tf.not_equal(path, INVALID_INDEX)) # (real_path_length,)
-            code = tf.boolean_mask(code, tf.not_equal(code, INVALID_INDEX) ) # (real_path_length,)
+            # Mask padded value
+            path = tf.boolean_mask(path, tf.not_equal(path, self.pad_index)) # (real_path_length,)
+            code = tf.boolean_mask(code, tf.not_equal(code, self.pad_index) ) # (real_path_length,)
 
             output_embedding_vector = tf.nn.embedding_lookup(output_embedding, path) # real_path_length * emb_size
             bias = tf.nn.embedding_lookup(output_bias, path) # (real_path_length,)
@@ -132,7 +136,6 @@ class HierarchySoftmax(HuffmanTree):
         return loss
 
 
-
 if __name__ == '__main__':
     from word2vec.dataset import Word2VecDataset
     input_pipe = Word2VecDataset(data_file = './data/sogou_news/corpus_new.txt',
@@ -141,7 +144,7 @@ if __name__ == '__main__':
                                  batch_size =5,
                                  min_count = 2,
                                  sample_rate = 0.01,
-                                 invalid_index = -1,
+                                 special_token=MyWordSpecialToken,
                                  buffer_size = 128,
                                  model='CBOW',
                                  window_size=2

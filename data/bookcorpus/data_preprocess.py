@@ -41,7 +41,7 @@ def main(data_dir, const_dir, language):
             fe.write(' '.join(encoder_source).lower())
             fe.write('\n')
             fd.write(' '.join(decoder_source).lower())
-            fe.write('\n')
+            fd.write('\n')
 
     print( 'Dumping Original Dictionary' )
     dump_dictionary( data_dir, sentences, debug= True)
