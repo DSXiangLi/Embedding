@@ -1,6 +1,7 @@
 import shutil
 import tensorflow as tf
 import os
+import pickle
 
 from tensorboard import summary
 from tensorflow.python.client import device_lib
@@ -48,16 +49,22 @@ def build_estimator(params, model_dir, model_fn, gpu_enable, RUN_CONFIG):
 
     return estimator
 
+
 def add_layer_summary(tag, value):
     tf.summary.scalar('{}/fraction_of_zero_values'.format(tag.replace(':','_')), tf.math.zero_fraction(value))
     tf.summary.histogram('{}/activation'.format(tag.replace(':','_')),  value)
 
-def write_projector_meta(log_dir, dictionary):
+
+def write_projector_meta(log_dir, dict_dir):
+    with open(os.path.join(dict_dir, 'dictionary.pkl'), 'rb') as f:
+        dictionary = pickle.load(f)
+
     # Projector meta file: word_index \t word
-    with open( os.path.join( log_dir, 'met  adata.tsv' ), "w" ) as f:
+    with open( os.path.join( log_dir, 'metadata.tsv' ), "w" ) as f:
         f.write( "Index\tLabel\n" )
         for word_index, word in enumerate(dictionary.keys()):
             f.write("%d\t%s\n" % (word_index, word))
+
 
 def pr_summary_hook(logits, labels, num_threshold, output_dir, save_steps):
     # add precision-recall curve summary
@@ -78,3 +85,10 @@ def pr_summary_hook(logits, labels, num_threshold, output_dir, save_steps):
 def get_available_gpus():
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
+
+def build_model_fn_from_class(model_class):
+    def model_fn(features, labels, mode, params):
+        model_cls = model_class(params)
+        return model_cls.build_model(features, labels, mode)
+    return model_fn
