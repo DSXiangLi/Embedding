@@ -1,5 +1,6 @@
 # -*- coding=utf-8 -*-
 
+
 class Seq2SeqModel(object):
     def __init__(self, params):
         self.params = params
@@ -16,12 +17,15 @@ class Seq2SeqModel(object):
     def build_model(self, features, labels, mode):
         raise NotImplementedError()
 
-    def _encode(self, **kwargs):
+    def _encode(self, *wargs):
         raise NotImplementedError()
 
-    def _decode(self, **kwargs):
+    def _decode(self, *wargs):
         raise NotImplementedError()
 
-    def compute_loss(self, **kwargs):
+    def compute_loss(self, *wargs):
+        raise NotImplementedError()
+
+    def predict(self, *wargs):
         raise NotImplementedError()
 

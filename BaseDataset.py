@@ -26,6 +26,8 @@ class BaseDataset(object):
         self.min_count = min_count
         self._dictionary = None
         self.special_token = special_token
+        self.word_table = None
+        self.token_table = None
 
     def params_check(self):
         raise NotImplementedError()
@@ -80,7 +82,7 @@ class BaseDataset(object):
     def build_wordtable(self):
         logging.info('Building word table')
 
-        word_table =  tf.lookup.StaticHashTable(
+        self.word_table = tf.lookup.StaticHashTable(
             initializer = tf.lookup.KeyValueTensorInitializer(
                 keys = list(self._dictionary.keys()),
                 values = list(range(self.total_size)),
@@ -90,26 +92,26 @@ class BaseDataset(object):
             , name ='word_table'
         )
 
-        tf.add_to_collection(word_table.name, word_table)
+        tf.add_to_collection(self.word_table.name, self.word_table)
 
-        return word_table
+        return self.word_table
 
     def build_tokentable(self):
         logging.info('Building Token table')
 
-        token_table = tf.lookup.StaticHashTable(
-            initializer = tf.lookup.KeyValueTensorInitializer(
-                keys = list(range(self.total_size)),
-                values = list(self._dictionary.keys()),
-                key_dtype = tf.int32,
-                value_dtype = tf.string
-            ), default_value = self.special_token.UNK # unseen token will be map to UNK
-            , name = 'token_table'
-        )
+        self.token_table = tf.lookup.StaticHashTable(
+                initializer = tf.lookup.KeyValueTensorInitializer(
+                    keys = list(range(self.total_size)),
+                    values = list(self._dictionary.keys()),
+                    key_dtype = tf.int32,
+                    value_dtype = tf.string
+                ), default_value = self.special_token.UNK # unseen token will be map to UNK
+                , name = 'token_table'
+            )
 
-        tf.add_to_collection(token_table.name, token_table)
+        tf.add_to_collection(self.token_table.name, self.token_table )
 
-        return token_table
+        return self.token_table
 
     def sample_filter_logic(self, *wargs):
         """

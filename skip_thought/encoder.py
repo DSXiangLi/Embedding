@@ -6,7 +6,8 @@ Encoder Collectionn
 """
 import tensorflow as tf
 from collections import namedtuple
-from skip_thought.utils import encoder_decoder_collection, build_rnn_cell
+
+from skip_thought.seq2seq_utils import encoder_decoder_collection, build_rnn_cell
 
 ENCODER_OUTPUT = namedtuple('EncoderOutput', ['output', 'state'])
 
@@ -24,6 +25,6 @@ def gru_encoder(input_emb, input_len, params):
         dtype=params['dtype'],
         time_major=False # whether reshape max_length to first dim
     )
-    return ENCODER_OUTPUT(output = output, state = state)
+    return ENCODER_OUTPUT(output=output, state=state)
 
 

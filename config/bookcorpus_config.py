@@ -10,15 +10,13 @@ MySpecialToken = SpecialSeqToken(SEQ_START = '<GO>',
 TRAIN_PARAMS_UPDATE = {
     'encoder_type': 'gru_encoder',
     'decoder_type': 'gru_decoder',
+    'hidden_units': [100], ## must be the length of cell_size
     'emb_size': 200,
     'cell_size': 1,
-    'hidden_units': 100,
-    'dtype': tf.float64,
-    'max_decoder_iter': 10,
-    'start_token': MySpecialToken.SEQ_START,
-    'end_token': MySpecialToken.SEQ_END,
+    'dtype': tf.float32,
+    'max_decode_iter': 20,
     'beam_width': 1,
-    'max_len': 20
+    'batch_size':10
 }
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)

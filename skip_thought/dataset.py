@@ -2,6 +2,7 @@
 
 from BaseDataset import *
 
+
 class SkipThoughtDataset(BaseDataset):
     def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count,
                  special_token, max_len):
@@ -37,10 +38,17 @@ class SkipThoughtDataset(BaseDataset):
         if append:
             tokens = tf.concat([tokens, [self.special_token.SEQ_END]], 0)
 
-        ## TODO: is it necessary to move parser field to const
         features['tokens'] = tokens
         features['seq_len'] = tf.size(tokens)
         return features
+
+    @property
+    def start_token(self):
+        return self.special_mapping[self.special_token.SEQ_START]
+
+    @property
+    def end_token(self):
+        return self.special_mapping[self.special_token.SEQ_END]
 
     @staticmethod
     def word_table_lookup(word_table):
@@ -56,11 +64,13 @@ class SkipThoughtDataset(BaseDataset):
             append = False
         elif data_type == 'decoder':
             if is_predict:
+                # decoder_source is not used in infer, only in loss calculation, append is done in Helper
                 prepend = False
                 append = True
             else:
+                # decodere_source in train&eval, start_token used in train, end_token used in eval
                 prepend = True
-                append = False
+                append = True
         else:
             raise Exception('data_type {} can only be [encoder/ decoder_input / decoder_target]'.format(data_type) )
         return prepend, append
@@ -84,7 +94,7 @@ class SkipThoughtDataset(BaseDataset):
         2. parse_example and add token
         2. convert word to token
         """
-        prepend, append = SkipThoughtDataset.prepend_append_logic(data_type, is_predict)
+        prepend, append = self.prepend_append_logic(data_type, is_predict)
 
         dataset = tf.data.TextLineDataset(file_path).\
             map(lambda x: self.parse_example(x, prepend, append)).\
@@ -114,7 +124,7 @@ class SkipThoughtDataset(BaseDataset):
         4. repeat & shuffle & padded_batch
         """
         def input_fn():
-            word_table_func = SkipThoughtDataset.word_table_lookup(self.build_wordtable())
+            word_table_func = self.word_table_lookup(self.build_wordtable())
             _ = self.build_tokentable() # initialize here to ensure lookup table is in the same graph
 
             encoder_source = self.make_source_dataset(self.data_file['encoder'], 'encoder', is_predict, word_table_func)
@@ -140,18 +150,18 @@ class SkipThoughtDataset(BaseDataset):
 
 
 if __name__ == '__main__':
-    from config.skip_thought_config import MySpecialToken
+    from config.bookcorpus_config import MySpecialToken, TRAIN_PARAMS
     sess = tf.Session()
 
     input_pipe = SkipThoughtDataset(data_file={'encoder': './data/bookcorpus/encoder_source.txt',
                                                'decoder': './data/bookcorpus/decoder_source.txt'},
                                     dict_file='./data/bookcorpus/dictionary.pkl',
-                                    epochs=10,
-                                    batch_size=10,
-                                    buffer_size=512,
-                                    min_count=10,
+                                    epochs=TRAIN_PARAMS['epochs'],
+                                    batch_size=TRAIN_PARAMS['batch_size'],
+                                    buffer_size=TRAIN_PARAMS['buffer_size'],
+                                    min_count=TRAIN_PARAMS['min_count'],
                                     special_token=MySpecialToken,
-                                    max_len=30)
+                                    max_len=TRAIN_PARAMS['max_decode_iter'])
     input_pipe.build_dictionary()
 
     print('Number of special token = {}'.format(input_pipe.special_size))
@@ -159,12 +169,11 @@ if __name__ == '__main__':
     print('Number of token vocab = {}'.format(input_pipe.total_size))
     print('Number of special mapping ={}'.format(input_pipe.special_mapping))
 
-    input_fn = input_pipe.build_dataset()
+    input_fn = input_pipe.build_dataset(is_predict=1)
     dataset = input_fn()
 
     iterator = tf.data.make_initializable_iterator( dataset )
     sess.run( iterator.initializer )
     sess.run( tf.tables_initializer() )
     sess.run( tf.global_variables_initializer() )
-    sess.run( iterator.get_next() )
-
+    print(sess.run( iterator.get_next() ))
