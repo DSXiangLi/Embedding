@@ -8,6 +8,7 @@ if len(ALL_DEVICES) > NUM_DEVICES:
     ALL_DEVICES = ALL_DEVICES[:NUM_DEVICES]
 
 CHECKPOINT_DIR = './checkpoint/{}_{}'
+DICTIONARY_DIR = './data/{}/dictionary.pkl'
 
 TRAIN_PARAMS = {
     'batch_size': 1000 * NUM_DEVICES,

@@ -41,9 +41,3 @@ def embedding_func(embedding):
         return tf.nn.embedding_lookup(embedding, id)
     return helper
 
-
-def model_fn(model):
-    def helper(features, labels, params, mode):
-        model_ = model(params)
-        return model_.build_model(features, labels, mode)
-    return helper

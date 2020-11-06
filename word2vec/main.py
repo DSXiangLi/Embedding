@@ -4,7 +4,7 @@ import importlib
 from utils import clear_model, build_estimator
 from word2vec.dataset import Word2VecDataset
 from word2vec.model import model_fn
-from config.default_config import CHECKPOINT_DIR
+from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR
 
 #import sys
 #sys.path.append('/Users/xiangli/Desktop/Embedding/word2vec')
@@ -13,8 +13,8 @@ from config.default_config import CHECKPOINT_DIR
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.model, args.train_algo)
+    dict_file = DICTIONARY_DIR.format( args.data )
     data_file = './data/{}/corpus_new.txt'.format(args.data)
-    dict_file = './data/{}/dictionary.pkl'.format(args.data)
 
     if args.clear_model:
         clear_model(model_dir)

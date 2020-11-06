@@ -6,14 +6,15 @@ import pickle
 import tensorflow as tf
 from utils import clear_model, build_estimator
 from fasttext.dataset import FasttextDataset
-from config.default_config import CHECKPOINT_DIR
+from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR
 
 
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.data, args.model)
+    dict_file = DICTIONARY_DIR.format( args.data )
     data_file = './data/{}/train.tfrecords'.format(args.data)
-    dict_file = './data/{}/dictionary.pkl'.format( args.data )
+
 
     if args.clear_model:
         clear_model(model_dir)
