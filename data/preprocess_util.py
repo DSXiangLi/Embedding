@@ -77,11 +77,10 @@ class StrUtils(object):
         print('Single Process time {:.0f}'.format(time.time()-t0))
         return word_cut
 
-
     def multi_word_cut(self, sentences):
         print('Multiprocessing Word cut ')
         if self.language == 'ch':
-            jieba.initialize() # initialize first, or it will initialize in each process
+            jieba.initialize()  # initialize first, or it will initialize in each process
             jieba.disable_parallel()
 
             def func(line):
@@ -89,9 +88,11 @@ class StrUtils(object):
                 return [i for i in line if ((not i.isdigit()) and (i not in self.stop_words )) ]
         else:
             def func(line):
-                return [i for i in line.split(" ") if ((not i.isdigit()) and (i not in self.stop_words))]
+                return [i for i in line.split(" ") if ((not i.isdigit()) and \
+                                                       (i not in self.stop_words) and \
+                                                       (len(i) >1 ) )]
 
-        pool = Pool(nodes = 5)
+        pool = Pool(nodes=5)
         t0 = time.time()
         word_cut = pool.map(func, sentences)
         pool.close()
