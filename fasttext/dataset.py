@@ -62,8 +62,8 @@ class FasttextDataset( BaseDataset ):
             parser = FasttextDataset.parse_example(self.ngram, self.tf_proto)
 
             dataset = tf.data.TFRecordDataset( self.data_file).\
-                map( lambda x: parser( x ) ). \
-                map( lambda features, label: word_table_lookup( features, label ) ). \
+                map( lambda x: parser( x ),  num_parallel_calls=tf.data.experimental.AUTOTUNE). \
+                map( lambda features, label: word_table_lookup( features, label ),  num_parallel_calls=tf.data.experimental.AUTOTUNE ). \
                 filter(self.sample_filter_logic)
 
             if not is_predict:

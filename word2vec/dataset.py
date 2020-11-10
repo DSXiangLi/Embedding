@@ -123,9 +123,9 @@ class Word2VecDataset(BaseDataset):
             window_slice_func = self.window_slice_func()
 
             dataset = tf.data.TextLineDataset(self.data_file).\
-                        map(lambda x: Word2VecDataset.parse_example(x)). \
-                        map(lambda x: wordtable.lookup(x)). \
-                        map(lambda x: Word2VecDataset.subsample(x, sampletable)). \
+                        map(lambda x: Word2VecDataset.parse_example(x),  num_parallel_calls=tf.data.experimental.AUTOTUNE). \
+                        map(lambda x: wordtable.lookup(x),  num_parallel_calls=tf.data.experimental.AUTOTUNE). \
+                        map(lambda x: Word2VecDataset.subsample(x, sampletable),  num_parallel_calls=tf.data.experimental.AUTOTUNE). \
                         filter(Word2VecDataset.sample_filter_logic).\
                         map( lambda x: window_slice_func( x ) ).\
                         flat_map( lambda features, label: tf.data.Dataset.from_tensor_slices( (features, label) ) )

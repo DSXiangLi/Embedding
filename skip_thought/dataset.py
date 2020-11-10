@@ -97,8 +97,8 @@ class SkipThoughtDataset(BaseDataset):
         prepend, append = self.prepend_append_logic(data_type, is_predict)
 
         dataset = tf.data.TextLineDataset(file_path).\
-            map(lambda x: self.parse_example(x, prepend, append)).\
-            map(lambda x: word_table_func(x))
+            map(lambda x: self.parse_example(x, prepend, append), num_parallel_calls=tf.data.experimental.AUTOTUNE).\
+            map(lambda x: word_table_func(x), num_parallel_calls=tf.data.experimental.AUTOTUNE)
 
         return dataset
 
