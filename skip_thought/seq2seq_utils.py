@@ -3,7 +3,7 @@ from collections import namedtuple
 import tensorflow as tf
 
 SEQ_LOSS_OUTPUT = namedtuple('SEQ_LOSS_OUTPUT', ['loss_id', 'loss_scaler', 'loss_per_time', 'loss_per_batch'])
-SEQ_PRED_OUTPUT = namedtuple('SEQ_PRED_OUTPUT', ['predict_prob', 'predict_id', 'predict_tokens', 'seq_len'])
+SEQ_PRED_OUTPUT = namedtuple('SEQ_PRED_OUTPUT', ['predict_prob', 'predict_id', 'predict_tokens', 'seq_len', 'vector'])
 ENCODER_FAMILY = {}
 DECODER_FAMILY = {}
 
@@ -44,12 +44,12 @@ def embedding_func(embedding):
 def sequence_mask(decoder_output, labels, params, mode):
     """
     Create Padded mask for sequence.
-    In train, mask padded part in batch padding length.
-    In eval, mask padded part in decoding length
+    In train, mask padded part in batch padded length.
+    In eval, mask padded part in batch decoding length
     Input:
         labels, params, mode
     Output:
-        mask: Train: (batch * _len-1), Eval: (batch * max_len)
+        mask: Train: (batch * padded_len-1), Eval: (batch * decode_len)
     """
 
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -69,22 +69,25 @@ def sequence_loss(logits, target, mask, mode):
     """
     Weighted cross-entropy loss for a sequence of logits
     Input:
-        logits: batch_size * max_len/padded_len * n_class
+        logits: batch_size * decode_len/(padded_len-1) * n_class
         target: batch_size * padded_len
-        mask: mask for padded value, batch_size * max_len
+        mask: mask for padded value, batch_size * decode_len/(padded_len-1)
     Output:
-        loss_mat: (batch * max_len) * 1
+        loss_mat: (batch * decode_len/(padded_len-1)) * 1
     """
     with tf.variable_scope('Sequence_loss_matrix'):
         n_class = tf.shape(logits)[2]
-        max_len = tf.shape(logits)[1] # for infer, max_len is determined by decoder
-        logits = tf.reshape(logits, [-1, n_class]) # (batch * (max_len-1)) * n_class
+        decode_len = tf.shape(logits)[1] # used for infer only, max_len is determined by decoder
+        logits = tf.reshape(logits, [-1, n_class])
 
         if mode == tf.estimator.ModeKeys.TRAIN:
+            # In train, target
             target = tf.reshape(target[:, 1:], [-1]) # (batch * (padded_len-1)) * 1
+        elif mode == tf.estimator.ModeKeys.EVAL:
+            # In eval, target has paded_len, logits have decode_len
+            target = tf.reshape(target[:, : decode_len], [-1]) # batch * (decode_len) *1
         else:
-            target = tf.reshape(target[:, : max_len], [-1]) # batch * (max_len) *1
-
+            raise Exception('sequence loss is only used in train or eval, not in pure prediction')
         loss_mat = tf.nn.sparse_softmax_cross_entropy_with_logits(labels = target, logits = logits)
         loss_mat = tf.multiply(loss_mat, tf.reshape(mask, [-1])) # apply padded mask on output loss
 

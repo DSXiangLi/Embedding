@@ -51,7 +51,6 @@ def main(args):
     model_fn = getattr(importlib.import_module('model_{}'.format(args.model)), 'model_fn')
     estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
-    #estimator.train(input_fn = input_pipe.build_dataset())
     if args.step == 'train':
         early_stopping = tf.estimator.experimental.stop_if_no_decrease_hook(
             estimator,
