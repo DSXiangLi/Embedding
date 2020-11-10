@@ -1,4 +1,4 @@
-from config.default_config import TRAIN_PARAMS, MyWordSpecialToken, RUN_CONFIG
+from config.default_config import TRAIN_PARAMS, SpecialWordToken, RUN_CONFIG
 
 TRAIN_PARAMS_UPDATE = {
     'window_size': 5,
@@ -10,4 +10,4 @@ TRAIN_PARAMS_UPDATE = {
 
 TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
 
-MySpecialToken = MyWordSpecialToken
+MySpecialToken = SpecialWordToken(UNK = '<UNK>', PAD ='<PAD>')

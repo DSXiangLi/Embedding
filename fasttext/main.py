@@ -58,7 +58,7 @@ def main(args):
             max_steps_without_decrease= 100 * 1000
         )
 
-        train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset(is_predict =0),
+        train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset(),
                                              hooks = [early_stopping])
 
         eval_spec = tf.estimator.EvalSpec( input_fn = input_pipe.build_dataset(is_predict=1),

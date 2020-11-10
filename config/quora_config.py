@@ -1,8 +1,8 @@
 import tensorflow as tf
-from config.default_config import  TRAIN_PARAMS, RUN_CONFIG, MyWordSpecialToken
+from config.default_config import TRAIN_PARAMS, RUN_CONFIG, SpecialWordToken
 
 
-MySpecialToken = MyWordSpecialToken
+MySpecialToken = SpecialWordToken(UNK = '<UNK>', PAD ='<PAD>')
 
 
 TF_PROTO = {
