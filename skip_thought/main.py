@@ -5,6 +5,7 @@ import tensorflow as tf
 from utils import clear_model, build_estimator
 from skip_thought.dataset import SkipThoughtDataset
 from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR
+from skip_thought.model import model_fn
 
 
 def main(args):
@@ -30,6 +31,7 @@ def main(args):
                                      epochs = TRAIN_PARAMS['epochs'],
                                      batch_size = TRAIN_PARAMS['batch_size'],
                                      min_count = TRAIN_PARAMS['min_count'],
+                                     max_count = TRAIN_PARAMS['max_count'],
                                      buffer_size = TRAIN_PARAMS['buffer_size'],
                                      special_token = MySpecialToken,
                                      max_len = TRAIN_PARAMS['max_decode_iter']
@@ -43,34 +45,47 @@ def main(args):
             'pad_index': input_pipe.pad_index,
             'model_dir': model_dir,
             'start_token': input_pipe.start_token,
-            'end_token': input_pipe.end_token
+            'end_token': input_pipe.end_token,
+            'pretrain_embedding': input_pipe.load_pretrain_embedding()
         }
     )
 
     # Init Estimator
-    model_fn = getattr(importlib.import_module('model_{}'.format(args.model)), 'model_fn')
     estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
     if args.step == 'train':
-        early_stopping = tf.estimator.experimental.stop_if_no_decrease_hook(
-            estimator,
-            metric_name ='loss',
-            max_steps_without_decrease= 100 * 1000
-        )
+        # early_stopping = tf.estimator.experimental.stop_if_no_decrease_hook(
+        #     estimator,
+        #     metric_name ='loss',
+        #     max_steps_without_decrease= 10 * 20000
+        # )
 
-        train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset(),
-                                             hooks = [early_stopping])
+        estimator.train(input_fn = input_pipe.build_dataset())
 
-        eval_spec = tf.estimator.EvalSpec( input_fn = input_pipe.build_dataset(is_predict=1),
-                                           steps = 500,
-                                           throttle_secs=60 )
-
-        tf.estimator.train_and_evaluate( estimator, train_spec, eval_spec )
+        # train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset(),
+        #                                      hooks = [early_stopping])
+        #
+        # eval_spec = tf.estimator.EvalSpec( input_fn = input_pipe.build_dataset(is_predict=1),
+        #                                    steps = 5000,
+        #                                    throttle_secs=60)
+        #
+        # tf.estimator.train_and_evaluate( estimator, train_spec, eval_spec )
 
     if args.step == 'predict':
         prediction = estimator.predict( input_fn = input_pipe.build_dataset(is_predict=1))
-        with open('prediction.pkl', 'wb') as f:
-            pickle.dump(prediction, f)
+        predict_token = []
+        sentence_embedding = []
+        for item in prediction:
+            predict_token.append(item['predict_tokens'])
+            sentence_embedding.append('encoder_state')
+
+        with open( './data/{}/predict_tokens.txt'.format( args.data), 'w', encoding='utf-8' ) as f:
+            for line in predict_token:
+                f.write( ' '.join( [i.decode('utf-8') for i in line] ).lower() )
+                f.write( '\n' )
+
+        with open('./data/{}/predict_embedding.pkl'.format(args.data), 'wb') as f:
+            pickle.dump(sentence_embedding, f)
 
 
 if __name__ == '__main__':
@@ -90,3 +105,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
+
+
+class args:
+    data = 'bookcorpus'
+    model = 'skip_thought'
+    gpu = 0
+    clear_model = 0
