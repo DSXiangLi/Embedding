@@ -16,7 +16,7 @@ class QuickThought(object):
         with tf.variable_scope('embedding', reuse=tf.AUTO_REUSE):
             self.embedding = tf.get_variable(dtype = self.params['dtype'],
                                              initializer=tf.constant(self.params['pretrain_embedding']),
-                                             name='encoder_embedding' )
+                                             name='word_embedding' )
 
             add_layer_summary(self.embedding.name, self.embedding)
 
@@ -43,8 +43,14 @@ class QuickThought(object):
         if mode == tf.estimator.ModeKeys.TRAIN:
             optimizer = tf.train.AdamOptimizer(learning_rate=get_learning_rate(self.params))
 
-            train_op = gradient_clipping(optimizer, loss_output.loss_scaler,
-                                         self.params['lower_gradient'], self.params['upper_gradient'])
+            update_ops=tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
+            with tf.control_dependencies(update_ops):
+                if self.params['clip_gradient']:
+                    train_op = gradient_clipping(optimizer, loss_output.loss_scaler,
+                                                 self.params['lower_gradient'], self.params['upper_gradient'])
+                else:
+                    train_op = optimizer.minimize(loss_output.loss_scaler, global_step=tf.train.get_global_step())
 
             return tf.estimator.EstimatorSpec( mode, loss=loss_output.loss_scaler, train_op=train_op )
 
