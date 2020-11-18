@@ -1,14 +1,18 @@
 # -*- coding=utf-8 -*-
 
 from BaseDataset import *
+import numpy as np
+import gensim.downloader
 
+PretrainModel = 'word2vec-google-news-300'
 
 class SkipThoughtDataset(BaseDataset):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count,
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
                  special_token, max_len):
         super(SkipThoughtDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
-                                                 special_token)
+                                                 max_count, special_token)
         self.max_len = max_len
+        self.embedding = None
         self.params_check()
 
     def params_check(self):
@@ -80,9 +84,9 @@ class SkipThoughtDataset(BaseDataset):
         Filter sample with length <=1 or length >= max_length. Filter must be applied after zip,
         otherwise encoder and decoder data will mis match
         """
-        filter_encoder = tf.logical_and(tf.greater(encoder_source['seq_len'], 1),
+        filter_encoder = tf.logical_and(tf.greater(encoder_source['seq_len'], 3),
                                         tf.less(encoder_source['seq_len'], self.max_len))
-        filter_decoder = tf.logical_and(tf.greater(decoder_source['seq_len'], 1),
+        filter_decoder = tf.logical_and(tf.greater(decoder_source['seq_len'], 3),
                                         tf.less(decoder_source['seq_len'], self.max_len))
 
         return tf.logical_and(filter_encoder, filter_decoder)
@@ -135,18 +139,31 @@ class SkipThoughtDataset(BaseDataset):
 
             if not is_predict:
                 dataset = dataset.\
-                    shuffle(self.buffer_size).\
                     repeat(self.epochs)
 
-            dataset = dataset. \
-                padded_batch( batch_size=self.batch_size,
-                              padded_shapes=self.padded_shape,
-                              padding_values=self.padding_values,
-                              drop_remainder=True ). \
-                prefetch( tf.data.experimental.AUTOTUNE )
+                dataset = dataset. \
+                    padded_batch( batch_size=self.batch_size,
+                                  padded_shapes=self.padded_shape,
+                                  padding_values=self.padding_values,
+                                  drop_remainder=True ). \
+                    prefetch( tf.data.experimental.AUTOTUNE )
+            else:
+                dataset = dataset.batch(1)
 
             return dataset
         return input_fn
+
+    def load_pretrain_embedding(self):
+        if self.embedding is None:
+            word_vector = gensim.downloader.load(PretrainModel)
+            embedding = []
+            for i in self._dictionary.keys():
+                try:
+                    embedding.append( word_vector.get_vector( i ) )
+                except KeyError:
+                    embedding.append( np.random.uniform(low=-0.1, high=0.1, size=300))
+            self.embedding = np.array(embedding, dtype=np.float32)
+        return self.embedding
 
 
 if __name__ == '__main__':
@@ -160,6 +177,7 @@ if __name__ == '__main__':
                                     batch_size=TRAIN_PARAMS['batch_size'],
                                     buffer_size=TRAIN_PARAMS['buffer_size'],
                                     min_count=TRAIN_PARAMS['min_count'],
+                                    max_count=TRAIN_PARAMS['max_count'],
                                     special_token=MySpecialToken,
                                     max_len=TRAIN_PARAMS['max_decode_iter'])
     input_pipe.build_dictionary()
@@ -169,7 +187,7 @@ if __name__ == '__main__':
     print('Number of token vocab = {}'.format(input_pipe.total_size))
     print('Number of special mapping ={}'.format(input_pipe.special_mapping))
 
-    input_fn = input_pipe.build_dataset(is_predict=1)
+    input_fn = input_pipe.build_dataset()
     dataset = input_fn()
 
     iterator = tf.data.make_initializable_iterator( dataset )
@@ -177,3 +195,8 @@ if __name__ == '__main__':
     sess.run( tf.tables_initializer() )
     sess.run( tf.global_variables_initializer() )
     print(sess.run( iterator.get_next() ))
+
+    input_pipe.load_pretrain_embedding()
+    print(input_pipe.embedding[0])
+
+
