@@ -31,7 +31,12 @@ def main(data_dir, const_dir, language):
     print('String Preprocessing and word Segmentation')
     sentences = preprocess.text_cleaning(sentences)
     sentences = preprocess.multi_word_cut(sentences)
+    sentences = [i for i in sentences if (len(i) <=10) and (len(i)>=3)]
 
+    with open('{}/all_sentences.txt'.format(data_dir), 'w', encoding='utf-8') as f:
+        for line in sentences:
+            f.write(' '.join(line).lower())
+            f.write('\n')
     print('Making Triplets out of clean corpus')
     train_sample = make_triplet(sentences)
 
@@ -49,4 +54,3 @@ def main(data_dir, const_dir, language):
 
 if __name__ == '__main__':
     main( 'data/bookcorpus', 'const', 'en' )
-

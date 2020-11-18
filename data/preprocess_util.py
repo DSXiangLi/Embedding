@@ -7,7 +7,7 @@ import pickle
 import itertools
 import time
 from pathos.multiprocessing import ProcessingPool as Pool
-import multiprocessing as mp
+
 
 class StrUtils(object):
     def __init__(self, path, language):
@@ -46,8 +46,8 @@ class StrUtils(object):
         new_sentences = []
         for line in tqdm(sentences):
             line = self.re_content.sub( "", line )
-            line = self.re_puncts.sub( "", line )
-            line = self.re_dup_spaces.sub( "", line )
+            line = self.re_puncts.sub( " ", line )
+            line = self.re_dup_spaces.sub( " ", line )
             new_sentences.append(line)
 
         return new_sentences
@@ -120,3 +120,5 @@ def dump_dictionary(output_path, sentences, prefix = '', debug=False):
         pickle.dump(dict, f )
     if debug:
         print(list(dict.most_common(10)))
+
+## all exception raise
