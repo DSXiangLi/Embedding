@@ -15,23 +15,48 @@ from skip_thought.seq2seq_utils import encoder_decoder_collection, build_rnn_cel
 DECODER_OUTPUT = namedtuple('DecoderOutput', ['output', 'state', 'seq_len'])
 
 
-def general_train_decoder(decoder_cell, encoder_output, input_emb, input_len, embedding, output_layer, params):
-    #In training remove end_token
-    train_helper = seq2seq.TrainingHelper( inputs=input_emb, # batch_size * max_len-1 * emb_size
-                                           sequence_length=input_len-1, # exclude last token
-                                           time_major=False,
-                                           name='training_helper' )
+def get_helper(encoder_output, input_emb, input_len, batch_size, embedding, mode, params):
 
-    decoder = seq2seq.BasicDecoder( cell=decoder_cell,
-                                    helper=train_helper,
-                                    initial_state=encoder_output.state,
-                                    output_layer=output_layer )
-    return decoder
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        if params['conditional']:
+            # conditional train helper with encoder output state as direct input
+            # Reshape encoder state as auxiliary input: 1* batch_size * hidden -> batch_size * max_len * hidden
+            decoder_length = tf.shape(input_emb)[1]
+            state_shape = tf.shape(encoder_output.state)
+            encoder_state = tf.tile(tf.reshape(encoder_output.state, [state_shape[1],
+                                                                      state_shape[0],
+                                                                      state_shape[2]]),
+                                    [1, decoder_length, 1])
+            # stupid way: use auxiliary input from ScheduleOutput Helper
+            # next_inputs_fn = tf.layers.Dense(units=params['emb_size'], trainable =False)
+            # sample output has same shape as embedding, not used
+            #
+            # helper = seq2seq.ScheduledOutputTrainingHelper(inputs=input_emb,  # batch_size * max_len-1 * emb_size
+            #                                                sequence_length=input_len-1,  # exclude last token
+            #                                                time_major=False,
+            #                                                # must be float: 0-> sampling 100% teacher forcing
+            #                                                sampling_probability=tf.Variable(0.0, dtype=tf.float32),
+            #                                                seed=1234,
+            #                                                auxiliary_inputs=encoder_state,
+            #                                                next_inputs_fn=next_inputs_fn,
+            #                                                name='training_helper')
+            # smarter way: concat encoder_state with input_emb directly
+            input_emb = tf.concat([encoder_state, input_emb], axis=-1)
+
+            helper = seq2seq.TrainingHelper( inputs=input_emb, # batch_size * max_len-1 * emb_size
+                                             sequence_length=input_len-1, # exclude last token
+                                             time_major=False,
+                                             name='training_helper' )
+    else:
+        helper = seq2seq.GreedyEmbeddingHelper( embedding=embedding_func( embedding ),
+                                                start_tokens=tf.fill([batch_size], params['start_token']),
+                                                end_token=params['end_token'] )
+
+    return helper
 
 
-def general_infer_decoder(decoder_cell, encoder_output, input_emb, input_len, embedding, output_layer, params):
-    batch_size = tf.shape(input_len)[0]
-
+def get_decoder(decoder_cell, encoder_output, input_emb, input_len, embedding, output_layer, mode, params):
+    batch_size = tf.shape(encoder_output.output)[0]
     if params['beam_width'] >1 :
         # If beam search multiple prediction are uesd at each time step
         decoder = seq2seq.BeamSearchDecoder( cell=decoder_cell,
@@ -41,16 +66,15 @@ def general_infer_decoder(decoder_cell, encoder_output, input_emb, input_len, em
                                              start_tokens=tf.fill([batch_size], params['start_token']),
                                              end_token=params['end_token'],
                                              output_layer=output_layer )
+
     else:
-        # otherwise only argmax samplid is used at each time step
-        infer_helper = seq2seq.GreedyEmbeddingHelper( embedding=embedding_func( embedding ),
-                                                      start_tokens=tf.fill([batch_size], params['start_token']),
-                                                      end_token=params['end_token'] )
+        helper = get_helper(encoder_output, input_emb, input_len, batch_size, embedding, mode, params)
 
         decoder = seq2seq.BasicDecoder( cell=decoder_cell,
-                                        helper=infer_helper,
+                                        helper=helper,
                                         initial_state=encoder_output.state,
                                         output_layer=output_layer )
+
     return decoder
 
 
@@ -59,22 +83,19 @@ def gru_decoder(encoder_output, input_emb, input_len, embedding, params, mode):
     gru_cell = build_rnn_cell( 'gru', params )
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        decoder_func = general_train_decoder
         max_iteration = None
     elif mode == tf.estimator.ModeKeys.EVAL:
-        decoder_func = general_infer_decoder
         max_iteration = tf.reduce_max(input_len) # decode max sequence length(=padded_length)in EVAL
     else:
-        decoder_func = general_infer_decoder
-        max_iteration = params['max_decoder_iter']  # decode pre-defined max_decode iter in predict
+        max_iteration = params['max_decode_iter']  # decode pre-defined max_decode iter in predict
 
-    output_layer = tf.layers.Dense( params['vocab_size'] )  # used for helper sample
-
-    decoder = decoder_func(gru_cell, encoder_output, input_emb, input_len, embedding, output_layer, params)
+    output_layer=tf.layers.Dense(units=params['vocab_size'])  # used for infer helper sample or train loss calculation
+    decoder = get_decoder(gru_cell, encoder_output, input_emb, input_len, embedding, output_layer, mode, params)
 
     output, state, seq_len = seq2seq.dynamic_decode(decoder=decoder,
                                                     output_time_major=False,
                                                     impute_finished=True,
                                                     maximum_iterations=max_iteration)
 
-    return DECODER_OUTPUT(output = output, state = state, seq_len = seq_len)
+    return DECODER_OUTPUT(output=output, state = state, seq_len=seq_len)
+
