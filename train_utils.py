@@ -14,3 +14,19 @@ def gradient_clipping(optimizer, cost, _lower, _upper):
                                          global_step=tf.train.get_global_step() )
 
     return train_op
+
+
+def get_learning_rate(params):
+    """
+    exponential learning rate deccay
+    """
+    ## TODO: support other decay method
+
+    if params.get('rate_decay', False):
+        return tf.train.exponential_decay(params['learning_rate'],
+                                          tf.train.get_global_step(),
+                                          params['decay_rate'],
+                                          params['decay_step']
+                                      )
+    else:
+        return params['learning_rate']

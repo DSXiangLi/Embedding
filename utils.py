@@ -21,12 +21,12 @@ def build_estimator(params, model_dir, model_fn, gpu_enable, RUN_CONFIG):
 
     if gpu_enable:
         # control CPU and Mem usage
-        session_config.gpu_options.allow_growth = True
-        session_config.gpu_options.per_process_gpu_memory_fraction = 0.8
-        session_config.log_device_placement = True
-        session_config.allow_soft_placement = True
-        session_config.inter_op_parallelism_threads = 6
-        session_config.intra_op_parallelism_threads = 6
+        session_config.gpu_options.allow_growth = RUN_CONFIG['allow_growth']
+        session_config.gpu_options.per_process_gpu_memory_fraction = RUN_CONFIG['pre_process_gpu_fraction']
+        session_config.log_device_placement = RUN_CONFIG['log_device_placement']
+        session_config.allow_soft_placement = RUN_CONFIG['allow_soft_placement']
+        session_config.inter_op_parallelism_threads = RUN_CONFIG['inter_op_parallel']
+        session_config.intra_op_parallelism_threads = RUN_CONFIG['intra_op_parallel']
         mirrored_strategy = tf.distribute.MirroredStrategy(RUN_CONFIG['devices'])
     else:
         mirrored_strategy = None
