@@ -33,6 +33,7 @@ def main(args):
                                   buffer_size=TRAIN_PARAMS['buffer_size'],
                                   special_token= MySpecialToken,
                                   min_count=TRAIN_PARAMS['min_count'],
+                                  max_count=TRAIN_PARAMS['max_count'],
                                   sample_rate = TRAIN_PARAMS['sample_rate'],
                                   model= args.model)
 

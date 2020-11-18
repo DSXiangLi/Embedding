@@ -1,17 +1,18 @@
 import collections
 import tensorflow as tf
-import pickle
 import logging
+import pickle
 
 
 class BaseDataset(object):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, special_token):
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count, special_token):
         """
         Input
             data_file: file path for dataset
             dict_file: file path for vocabulary dictionary(default to pickle dump)
             epochs, batch_size, buffer_size: train parameter to build input dataset pipeple
             min_count: minimal number of word occurence, smaller than this will be mapped to UNK
+            maxcount: maxium number of word occurence, smaller than this will be mapped to UNK
             speical_token: iterable containing all special character, eg. UNK, PAD, Sequence Start/end
         Return
             dictionary: vocab to count dictionary
@@ -24,6 +25,7 @@ class BaseDataset(object):
         self.batch_size = batch_size
         self.buffer_size = buffer_size
         self.min_count = min_count
+        self.max_count = max_count
         self._dictionary = None
         self.special_token = special_token
         self.word_table = None
@@ -62,6 +64,10 @@ class BaseDataset(object):
     def pad_index(self):
         return self.special_mapping[self.special_token.PAD]
 
+    @property
+    def unk_index(self):
+        return self.special_mapping[self.special_token.UNK]
+
     def build_dictionary(self):
         """
         _dictionray: {char:frequency} order by descending frequency
@@ -73,7 +79,7 @@ class BaseDataset(object):
             dictionary = pickle.load(f)
 
         if self.min_count>0:
-            dictionary = dict([(i,j) for i,j in dictionary.items() if j >= self.min_count])
+            dictionary = dict([(i,j) for i,j in dictionary.items() if (j >= self.min_count) and (j <= self.max_count)])
 
         dictionary.update(dict.fromkeys(self.special_token._asdict().values(), -1))
 

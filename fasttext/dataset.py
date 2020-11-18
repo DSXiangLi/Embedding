@@ -1,8 +1,8 @@
 from BaseDataset import *
 
 class FasttextDataset( BaseDataset ):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, special_token, ngram, tf_proto):
-        super( FasttextDataset, self ).__init__( data_file, dict_file, epochs, batch_size, buffer_size, min_count, special_token)
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count, special_token, ngram, tf_proto):
+        super( FasttextDataset, self ).__init__( data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count, special_token)
         self.ngram = ngram
         self.tf_proto = tf_proto
 
@@ -90,6 +90,7 @@ if __name__ == '__main__':
                                  epochs = 10,
                                  batch_size =5,
                                  min_count = 2,
+                                 max_count = 100000,
                                  buffer_size = 128,
                                  special_token = MySpecialToken,
                                  ngram = 1,

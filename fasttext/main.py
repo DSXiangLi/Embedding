@@ -15,7 +15,6 @@ def main(args):
     dict_file = DICTIONARY_DIR.format( args.data )
     data_file = './data/{}/train.tfrecords'.format(args.data)
 
-
     if args.clear_model:
         clear_model(model_dir)
 
@@ -31,6 +30,7 @@ def main(args):
                                  epochs = TRAIN_PARAMS['epochs'],
                                  batch_size = TRAIN_PARAMS['batch_size'],
                                  min_count = TRAIN_PARAMS['min_count'],
+                                 max_count=  TRAIN_PARAMS['max_count'],
                                  buffer_size = TRAIN_PARAMS['buffer_size'],
                                  special_token = MySpecialToken,
                                  ngram = TRAIN_PARAMS['ngram'],

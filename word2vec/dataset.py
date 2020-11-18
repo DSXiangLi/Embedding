@@ -2,9 +2,9 @@ from BaseDataset import *
 
 
 class Word2VecDataset(BaseDataset):
-    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count,
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
                  special_token, window_size, sample_rate, model):
-        super(Word2VecDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
+        super(Word2VecDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
                                               special_token)
         self.model = model
         self.window_size = window_size
@@ -150,6 +150,7 @@ if __name__ == '__main__':
                                  epochs = 10,
                                  batch_size =5,
                                  min_count = 2,
+                                 max_count = 100000,
                                  special_token=MySpecialToken,
                                  buffer_size = 128,
                                  window_size=2,
