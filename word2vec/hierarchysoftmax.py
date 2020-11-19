@@ -1,6 +1,5 @@
 import heapq
 import tensorflow as tf
-from config.default_config import MyWordSpecialToken
 
 
 class TreeNode(object):
@@ -138,6 +137,7 @@ class HierarchySoftmax(HuffmanTree):
 
 if __name__ == '__main__':
     from word2vec.dataset import Word2VecDataset
+    from config.sogou_news_config import MyWordSpecialToken
     input_pipe = Word2VecDataset(data_file = './data/sogou_news/corpus_new.txt',
                                  dict_file = './data/sogou_news/dictionary.pkl',
                                  epochs = 10,
