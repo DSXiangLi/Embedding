@@ -10,7 +10,7 @@ MySpecialToken = SpecialSeqToken(SEQ_START = '<GO>',
 TRAIN_PARAMS_UPDATE = {
     'encoder_type': 'gru_encoder',
     'decoder_type': 'gru_decoder',
-    'hidden_units': [50],
+    'hidden_units': [100],
     'emb_size': 300,
     'cell_size': 1,
     'dtype': tf.float32,

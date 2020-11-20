@@ -54,35 +54,12 @@ def main(args):
     estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
     if args.step == 'train':
-        # early_stopping = tf.estimator.experimental.stop_if_no_decrease_hook(
-        #     estimator,
-        #     metric_name ='loss',
-        #     max_steps_without_decrease= 10 * 20000
-        # )
-
         estimator.train(input_fn = input_pipe.build_dataset())
 
-        # train_spec = tf.estimator.TrainSpec( input_fn = input_pipe.build_dataset(),
-        #                                      hooks = [early_stopping])
-        #
-        # eval_spec = tf.estimator.EvalSpec( input_fn = input_pipe.build_dataset(is_predict=1),
-        #                                    steps = 5000,
-        #                                    throttle_secs=60)
-        #
-        # tf.estimator.train_and_evaluate( estimator, train_spec, eval_spec )
-
     if args.step == 'predict':
+        # Please disable GPU in prediction to avoid DST exhausted Error
         prediction = estimator.predict( input_fn = input_pipe.build_dataset(is_predict=1))
-        predict_token = []
-        sentence_embedding = []
-        for item in prediction:
-            predict_token.append(item['predict_tokens'])
-            sentence_embedding.append('encoder_state')
-
-        with open( './data/{}/predict_tokens.txt'.format( args.data), 'w', encoding='utf-8' ) as f:
-            for line in predict_token:
-                f.write( ' '.join( [i.decode('utf-8') for i in line] ).lower() )
-                f.write( '\n' )
+        sentence_embedding = [item['encoder_state'] for item in prediction ]
 
         with open('./data/{}/predict_embedding.pkl'.format(args.data), 'wb') as f:
             pickle.dump(sentence_embedding, f)
@@ -105,10 +82,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
-
-
-class args:
-    data = 'bookcorpus'
-    model = 'skip_thought'
-    gpu = 0
-    clear_model = 0

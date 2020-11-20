@@ -31,12 +31,13 @@ class QuickThought(object):
         """
 
         encoder_output = self._encode(features)
-        decoder_output = self._decode(encoder_output, labels, mode )
 
         if mode == tf.estimator.ModeKeys.PREDICT:
-            predictions = self.predict( decoder_output, encoder_output )
+            predictions = self.predict(encoder_output)
             return tf.estimator.EstimatorSpec(mode=tf.estimator.ModeKeys.PREDICT,
                                               predictions=predictions)
+
+        decoder_output = self._decode(encoder_output, labels, mode )
 
         loss_output = self.compute_loss( decoder_output, labels, mode )
 
@@ -132,21 +133,18 @@ class QuickThought(object):
                                loss_per_batch=loss[1],
                                loss_per_time=loss[2])
 
-    def predict(self, decoder_output, encoder_output):
+    def predict(self, encoder_output):
         """
         Generate prediction given decoder_output
 
         """
         with tf.variable_scope('inference'):
-            predict_prob = tf.nn.softmax(decoder_output.output.rnn_output) # batch_size * decoder_length * vocab_size
-            predict_id = decoder_output.output.sample_id # batch_size * decoder_length
-            predict_tokens = tf.get_collection('token_table')[0].lookup(predict_id) # batch * decoder_length
+            #predict_prob = tf.nn.softmax(decoder_output.output.rnn_output) # batch_size * decoder_length * vocab_size
+            #predict_id = decoder_output.output.sample_id # batch_size * decoder_length
+            #predict_tokens = tf.get_collection('token_table')[0].lookup(predict_id) # batch * decoder_length
             vector = tf.identity( encoder_output.state, name='sentence_vector' )
 
-        return {'predict_prob': predict_prob,
-                'predict_id': predict_id,
-                'predict_tokens': predict_tokens,
-                'seq_len': decoder_output.seq_len,
+        return {
                 'encoder_state': vector
                 }
 
