@@ -2,12 +2,12 @@
 
 ### Model Draft
 
-#### 1. Word2vec demo 
+#### 1. Word2vec Demo 
 bash data/sogou_news_big/extract_file.sh
 
 python word2vec/main.py --model SG --train_algo HS  [Skip-gram Hierarchy Softmax]
 
-#### 2. fasttext classification demo
+#### 2. fasttext classification Demo
 python data/quora_fasttext/data_preprocess.py
 
 python fasttext/main.py --gpu 1 [allow using gpu in tf.estimator]
@@ -18,6 +18,11 @@ bash data/sogou_news_big/extract_file.sh
 bash doc2vec/model_run.sh
 
 Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
+
+#### 4. Skip-thought Demo
+bash data/bookcorpus/run.sh
+
+python skip_thought/main.py --clear_model 0 --gpu 1 
 
 
 ### Paper List 
@@ -53,3 +58,4 @@ Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 - 无所不能的Embedding1 - Word2vec模型详解&代码实现 https://www.cnblogs.com/gogoSandy/p/13418257.html
 - 无所不能的Embedding2 - FastText词向量&文本分类 https://www.cnblogs.com/gogoSandy/p/13618077.html
 - 无所不能的Embedding3 - word2vec->Doc2vec[PV-DM/PV-DBOW] https://www.cnblogs.com/gogoSandy/p/13773327.html
+- 无所不能的Embedding4 - Doc2vec第二弹[skip-thought & tf-Seq2Seq源码解析]  https://www.cnblogs.com/gogoSandy/p/14009265.html
