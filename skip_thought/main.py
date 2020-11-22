@@ -59,10 +59,12 @@ def main(args):
     if args.step == 'predict':
         # Please disable GPU in prediction to avoid DST exhausted Error
         prediction = estimator.predict( input_fn = input_pipe.build_dataset(is_predict=1))
-        sentence_embedding = [item['encoder_state'] for item in prediction ]
+        res = {}
+        for item in prediction:
+            res[' '.join([ i.decode('utf-8') for i in item['input_token']])] = item['encoder_state']
 
         with open('./data/{}/predict_embedding.pkl'.format(args.data), 'wb') as f:
-            pickle.dump(sentence_embedding, f)
+            pickle.dump(res, f)
 
 
 if __name__ == '__main__':
@@ -82,3 +84,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args)
+
+
+# class args:
+#     clear_model=0
+#     data='bookcorpus'
+#     model='skip_thought'
+#     gpu=0
+#     step='predict'
