@@ -38,8 +38,10 @@ python skip_thought/main.py --clear_model 0 --gpu 1
 #### 通用文本向量
 - [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
 - [Doc2vec] A SIMPLE BUT TOUGH-TO-BEAT BASELINE FOR SEN- TENCE EMBEDDINGS (2017)
-- [Skip-Thought] Skip-Thought Vectors (2015)
-- [Quick-Thought] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
+- [Encoder-Decoder: Skip-Thought] Skip-Thought Vectors (2015)
+- [Encoder-Decoder: Skip-Thought] Rethinking Skip-thought- A Neighborhood based Approach (2017)
+- [Encoder-Decoder: CNN-LSTM]Learning Generic Sentence Representations Using Convolutional Neural Networks (2017)
+- [Encoder-Decoder: Quick-Thought] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
@@ -53,6 +55,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1
 - [Alibaba] Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba (Alibaba 2018)
 #### 召回
 - [LSH] Locality-Sensitive Hashing for Finding Nearest Neighbors (2008)
+- [HNSW] Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs(2016)
 
 ### Blog 
 - 无所不能的Embedding1 - Word2vec模型详解&代码实现 https://www.cnblogs.com/gogoSandy/p/13418257.html
