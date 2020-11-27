@@ -1,8 +1,9 @@
 # -*- coding=utf-8 -*-
 import tensorflow as tf
 
-from skip_thought.seq2seq_utils import (ENCODER_FAMILY, DECODER_FAMILY, SEQ_LOSS_OUTPUT,
+from skip_thought.seq2seq_utils import (ENCODER_FAMILY, SEQ_LOSS_OUTPUT,
                                         sequence_loss, agg_sequence_loss, sequence_mask)
+from skip_thought.decoder import decoder
 from utils import add_layer_summary, build_model_fn_from_class
 from train_utils import gradient_clipping, get_learning_rate
 
@@ -90,8 +91,6 @@ class QuickThought(object):
             DECODER_OUTPUT
         """
         with tf.variable_scope('decoding'):
-            decoder = DECODER_FAMILY[self.params['decoder_type']]
-
             if mode == tf.estimator.ModeKeys.TRAIN:
                 seq_emb_output = tf.nn.embedding_lookup(self.embedding, labels['tokens']) # batch_size * max_len * emb_size
                 input_len = labels['seq_len']
