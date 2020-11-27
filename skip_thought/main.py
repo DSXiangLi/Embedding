@@ -4,7 +4,7 @@ import pickle
 import tensorflow as tf
 from utils import clear_model, build_estimator
 from skip_thought.dataset import SkipThoughtDataset
-from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR
+from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR, set_encoder_decoder_params
 from skip_thought.model import model_fn
 
 
@@ -22,8 +22,9 @@ def main(args):
 
     # Init config
     TRAIN_PARAMS = getattr(importlib.import_module('config.{}_config'.format(args.data)), 'TRAIN_PARAMS')
-    RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'RUN_CONFIG' )
-    MySpecialToken = getattr( importlib.import_module( 'config.{}_config'.format( args.data ) ), 'MySpecialToken')
+    RUN_CONFIG = getattr( importlib.import_module( 'config.{}_config'.format( args.data) ), 'RUN_CONFIG' )
+    MySpecialToken = getattr( importlib.import_module( 'config.{}_config'.format( args.data) ), 'MySpecialToken')
+    ED_PARAMS =  getattr( importlib.import_module( 'config.{}_config'.format( args.data) ), 'ED_PARAMS')
 
     # Init dataset
     input_pipe = SkipThoughtDataset( data_file = data_file,
@@ -49,8 +50,8 @@ def main(args):
             'pretrain_embedding': input_pipe.load_pretrain_embedding()
         }
     )
+    TRAIN_PARAMS = set_encoder_decoder_params(args.model, TRAIN_PARAMS, ED_PARAMS)
 
-    # Init Estimator
     estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
     if args.step == 'train':
@@ -77,8 +78,8 @@ if __name__ == '__main__':
                          required=False, default=1)
     parser.add_argument( '--data', type=str, help='which data to use[data should be list of tokenized string]',
                          required=False, default='bookcorpus')
-    parser.add_argument( '--model', type = str, help = 'which model to use[skip_thought | quick_thought]',
-                         required=False, default='skip_thought')
+    parser.add_argument( '--model', type = str, help = 'models: [gru_gru(alias skip_thought)|cnn_lstm|cnn_gru]',
+                         required=False, default='gru_gru')
     parser.add_argument('--gpu', type =int, help = 'Whether to enable gpu',
                         required =False, default = 0 )
     args = parser.parse_args()
@@ -86,9 +87,9 @@ if __name__ == '__main__':
     main(args)
 
 
-# class args:
-#     clear_model=0
-#     data='bookcorpus'
-#     model='skip_thought'
-#     gpu=0
-#     step='predict'
+class args:
+    clear_model=0
+    data='bookcorpus'
+    model='skip_thought'
+    gpu=0
+    step='predict'
