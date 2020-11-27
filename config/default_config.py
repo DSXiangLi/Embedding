@@ -1,3 +1,4 @@
+import tensorflow as tf
 from collections import namedtuple
 from utils import get_available_gpus
 
@@ -39,6 +40,24 @@ RUN_CONFIG = {
     'inter_op_parallel': 2,
     'intra_op_parallel': 2
 }
+
+
+def set_encoder_decoder_params(model, params, ed_params):
+    """
+    model name consist of 'encode_decoder'
+    - cnn/gru are supported for encoder
+    - gru/lstm are supported for decoder
+    """
+    encoder, decoder = model.split('_')
+
+    params['decoder_cell'] = decoder
+    params['encoder_cell'] = encoder
+    params['encoder_type'] = '{}_encoder'.format(encoder)
+    params['decoder_type'] = '{}_decoder'.format(decoder)
+    params['encoder_cell_params'] = ed_params[encoder]
+    params['decoder_cell_params'] = ed_params[decoder]
+
+    return params
 
 
 SpecialSeqToken = namedtuple('SpecialToken', ['SEQ_START', 'SEQ_END', 'UNK', 'PAD'])
