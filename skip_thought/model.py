@@ -8,7 +8,7 @@ from utils import add_layer_summary, build_model_fn_from_class
 from train_utils import gradient_clipping, get_learning_rate
 
 
-class QuickThought(object):
+class SkipThought(object):
     def __init__(self, params):
         self.params = params
         self.init()
@@ -151,4 +151,4 @@ class QuickThought(object):
                 }
 
 
-model_fn = build_model_fn_from_class(QuickThought)
+model_fn = build_model_fn_from_class(SkipThought)
