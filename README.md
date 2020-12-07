@@ -19,10 +19,10 @@ bash doc2vec/model_run.sh
 
 Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 
-#### 4. Encoder-Decoder大家族【skip-thought/neighbour/CNN-LSTM】Demo
+#### 4. Skip-thought/Quick-thought大家族 Demo
 bash data/bookcorpus/run.sh
 
-python skip_thought/main.py --clear_model 0 --gpu 1  --model[gru_gru(skip-thought)/cnn_gru/cnn_lstm]
+python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick_thought] --cell_type[gru_gru, cnn_gru, cnn_lstm]
 
 
 ### Paper List 
