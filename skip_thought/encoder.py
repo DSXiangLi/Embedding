@@ -50,3 +50,5 @@ def cnn_encoder(input_emb, input_len, params):
     return ENCODER_OUTPUT(output=output, state=(output,))
 
 
+##TODO: add bi-directional encoder
+##TODO: add attention

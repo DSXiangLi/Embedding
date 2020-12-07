@@ -15,12 +15,13 @@ TRAIN_PARAMS_UPDATE = {
     'beam_width': 1,
     'min_count': 2,
     'max_count': 50000,
-    'batch_size': 20,
+    'batch_size': 100,
     'learning_rate': 0.001,
     'conditional': True,
     'clip_gradient': True,
     'rate_decay': False,
-    'bridge_needed': True # If encoder & decoder has same cell and shape, turn to False
+    'bridge_needed': True, # If encoder & decoder has same cell and shape, turn to False
+    'context_size': 3 # needed in the Quick thought label generation
 }
 
 
@@ -29,17 +30,17 @@ TRAIN_PARAMS.update(TRAIN_PARAMS_UPDATE)
 # Encoder，decoder must have same state shape, otherwise bridge is needed
 ED_PARAMS = {
     'gru': {
-        'hidden_units': [100],
+        'hidden_units': [150],
         'cell_size': 1,
         'keep_prob': [0.9]
     },
     'cnn': {
-        'filters': [50] * 2,
-        'kernel_size': [3, 4],
-        'strides': [1] * 2,
-        'padding': ['VALID'] * 2,
-        'activation': [tf.nn.tanh] * 2,
-        'pooling': [tf.nn.max_pool1d] * 2,
+        'filters': [50] * 3,
+        'kernel_size': [3, 4, 5],
+        'strides': [1] * 3,
+        'padding': ['VALID'] * 3,
+        'activation': [tf.nn.tanh] * 3,
+        'pooling': [tf.nn.max_pool1d] * 3,
         'dropout_rate': [0.1, 0.1, 0.1]
     },
     'lstm': {
@@ -49,4 +50,4 @@ ED_PARAMS = {
     }
 }
 
-
+lixiang1994

@@ -5,17 +5,24 @@ import tensorflow as tf
 from utils import clear_model, build_estimator
 from skip_thought.dataset import SkipThoughtDataset
 from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR, set_encoder_decoder_params
-from skip_thought.model import model_fn
 
 
 def main(args):
 
     model_dir = CHECKPOINT_DIR.format(args.data, args.model)
     dict_file = DICTIONARY_DIR.format( args.data )
-    data_file = {
-        'encoder' : './data/{}/encoder_source.txt'.format(args.data),
-        'decoder' : './data/{}/decoder_source.txt'.format(args.data)
-    }
+
+    # For Quick-thought model,encoder source = decoder source = all continuous sentences
+    if args.model == 'quick_thought':
+        data_file = {
+            'encoder': './data/{}/all_sentences.txt'.format(args.data),
+            'decoder': './data/{}/all_sentences.txt'.format(args.data)
+        }
+    else:
+        data_file = {
+            'encoder': './data/{}/encoder_source.txt'.format(args.data),
+            'decoder': './data/{}/decoder_source.txt'.format(args.data)
+        }
 
     if args.clear_model:
         clear_model(model_dir)
@@ -50,7 +57,10 @@ def main(args):
             'pretrain_embedding': input_pipe.load_pretrain_embedding()
         }
     )
-    TRAIN_PARAMS = set_encoder_decoder_params(args.model, TRAIN_PARAMS, ED_PARAMS)
+
+    TRAIN_PARAMS = set_encoder_decoder_params(args.cell_type, TRAIN_PARAMS, ED_PARAMS)
+
+    model_fn = getattr( importlib.import_module('skip_thought.model'), '{}_model'.format(args.model))
 
     estimator = build_estimator(TRAIN_PARAMS, model_dir, model_fn, args.gpu, RUN_CONFIG)
 
@@ -64,7 +74,7 @@ def main(args):
         for item in prediction:
             res[' '.join([ i.decode('utf-8') for i in item['input_token']])] = item['encoder_state']
 
-        with open('./data/{}/predict_embedding.pkl'.format(args.data), 'wb') as f:
+        with open('./data/{}/{}_predict_embedding.pkl'.format(args.data, args.model), 'wb') as f:
             pickle.dump(res, f)
 
 
@@ -78,7 +88,9 @@ if __name__ == '__main__':
                          required=False, default=1)
     parser.add_argument( '--data', type=str, help='which data to use[data should be list of tokenized string]',
                          required=False, default='bookcorpus')
-    parser.add_argument( '--model', type = str, help = 'models: [gru_gru(alias skip_thought)|cnn_lstm|cnn_gru]',
+    parser.add_argument( '--model', type = str, help = 'models: [skip_thought|quick_thought]',
+                         required=False, default='skip_thought')
+    parser.add_argument( '--cell_type', type = str, help = 'cell for encoder_decoder[gru_gru|cnn_lstm|cnn_gru]',
                          required=False, default='gru_gru')
     parser.add_argument('--gpu', type =int, help = 'Whether to enable gpu',
                         required =False, default = 0 )

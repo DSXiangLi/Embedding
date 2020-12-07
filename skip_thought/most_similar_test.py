@@ -10,7 +10,7 @@ def normalize(vector: np.ndarray):
     return vector / norm
 
 
-with open('./data/bookcorpus/predict_embedding.pkl', 'rb') as f:
+with open('./data/bookcorpus/quick_thought_predict_embedding.pkl', 'rb') as f:
     res = pickle.load(f)
 
 
@@ -35,9 +35,11 @@ def find_topn_most_similar(sentence, topn):
     for i in range(topn):
         print('Most Similar score = {:.2f} sentences = {}'.format(scores[i], sim_seq[i]))
 
-topn = 5
+topn = 2
 
-for i in range(10):
-    print('\n Finding Top {} for {}'.format(topn, seqs[i]))
+for i in range(100):
+    print('\n Finding Top {} for "{}" '.format(topn, seqs[i]))
 
     find_topn_most_similar(seqs[i], topn)
+
+
