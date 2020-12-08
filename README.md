@@ -42,7 +42,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [Encoder-Decoder: Skip-Thought] Rethinking Skip-thought- A Neighborhood based Approach (2017)
 - [Encoder-Decoder: CNN-LSTM]Learning Generic Sentence Representations Using Convolutional Neural Networks (2017)
 - [Encoder-Decoder: Quick-Thought] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
-- [Transformer] 
+- [Transformer] Attention is all you need (2017)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
