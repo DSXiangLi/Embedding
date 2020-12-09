@@ -42,6 +42,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [Encoder-Decoder: Skip-Thought] Rethinking Skip-thought- A Neighborhood based Approach (2017)
 - [Encoder-Decoder: CNN-LSTM]Learning Generic Sentence Representations Using Convolutional Neural Networks (2017)
 - [Encoder-Decoder: Quick-Thought] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
+- [Transformer] Attention is all you need (2017)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
@@ -62,3 +63,4 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - 无所不能的Embedding2 - FastText词向量&文本分类 https://www.cnblogs.com/gogoSandy/p/13618077.html
 - 无所不能的Embedding3 - word2vec->Doc2vec[PV-DM/PV-DBOW] https://www.cnblogs.com/gogoSandy/p/13773327.html
 - 无所不能的Embedding4 - Doc2vec第二弹[skip-thought & tf-Seq2Seq源码解析]  https://www.cnblogs.com/gogoSandy/p/14009265.html
+- 无所不能的Embedding5 - skip-thought的兄弟们[Trim/CNN-LSTM/quick-thought]  https://www.cnblogs.com/gogoSandy/p/14094590.html
