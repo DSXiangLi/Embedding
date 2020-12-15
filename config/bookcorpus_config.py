@@ -41,13 +41,11 @@ ED_PARAMS = {
         'padding': ['VALID'] * 3,
         'activation': [tf.nn.tanh] * 3,
         'pooling': [tf.nn.max_pool1d] * 3,
-        'dropout_rate': [0.1, 0.1, 0.1]
+        'keep_prob': [0.9, 0.9, 0.9]
     },
     'lstm': {
         'hidden_units': [90],
         'cell_size': 1,
-        'dropout_rate': [0.1]
+        'keep_prob': [0.9]
     }
 }
-
-lixiang1994
