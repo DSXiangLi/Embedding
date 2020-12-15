@@ -35,7 +35,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [Fasttext] [Fasttext]Bag of Tricks for Efficient Text Classification (Facebook 2016)
 - [Glove] Global Vectors for Word Representation (2014)
 - [ELMo] Deep contextualized word representations (2018)
-#### 通用文本向量
+#### 文本向量
 - [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
 - [Doc2vec] A SIMPLE BUT TOUGH-TO-BEAT BASELINE FOR SEN- TENCE EMBEDDINGS (2017)
 - [Encoder-Decoder: Skip-Thought] Skip-Thought Vectors (2015)
@@ -43,6 +43,10 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [Encoder-Decoder: CNN-LSTM]Learning Generic Sentence Representations Using Convolutional Neural Networks (2017)
 - [Encoder-Decoder: Quick-Thought] Quick-Thought: AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS (Google 2018)
 - [Transformer] Attention is all you need (2017)
+- [FastSent|DVAE]Learning Distributed Representations of Sentences from Unlabelled Data (2016)
+- [Siamese] Learning Text Similarity with Siamese Recurrent Networks (2016)
+- [InferSent] Supervised Learning of Universal Sentence Representations from Natural Language Inference Data (2018)
+- [MTL] LEARNING GENERAL PURPOSE DISTRIBUTED SENTENCE REPRESENTATIONS VIA LARGE SCALE MULTITASK LEARNING (2018)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
