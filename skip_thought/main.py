@@ -42,7 +42,8 @@ def main(args):
                                      max_count = TRAIN_PARAMS['max_count'],
                                      buffer_size = TRAIN_PARAMS['buffer_size'],
                                      special_token = MySpecialToken,
-                                     max_len = TRAIN_PARAMS['max_decode_iter']
+                                     max_len = TRAIN_PARAMS['max_decode_iter'],
+                                     min_len =  TRAIN_PARAMS['min_len']
                                      )
     input_pipe.build_dictionary()
 

@@ -2,16 +2,18 @@
 
 from BaseDataset import *
 import numpy as np
-import gensim.downloader
+from gensim import models
 
-PretrainModel = 'word2vec-google-news-300'
+PretrainModel = './skip_thought/GoogleNews-vectors-negative300.bin'
+
 
 class SkipThoughtDataset(BaseDataset):
     def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
-                 special_token, max_len):
+                 special_token, max_len, min_len):
         super(SkipThoughtDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
                                                  max_count, special_token)
         self.max_len = max_len
+        self.min_len = min_len
         self.embedding = None
         self.params_check()
 
@@ -84,9 +86,9 @@ class SkipThoughtDataset(BaseDataset):
         Filter sample with length <=1 or length >= max_length. Filter must be applied after zip,
         otherwise encoder and decoder data will mis match
         """
-        filter_encoder = tf.logical_and(tf.greater(encoder_source['seq_len'], 3),
+        filter_encoder = tf.logical_and(tf.greater(encoder_source['seq_len'], self.min_len),
                                         tf.less(encoder_source['seq_len'], self.max_len))
-        filter_decoder = tf.logical_and(tf.greater(decoder_source['seq_len'], 3),
+        filter_decoder = tf.logical_and(tf.greater(decoder_source['seq_len'], self.min_len),
                                         tf.less(decoder_source['seq_len'], self.max_len))
 
         return tf.logical_and(filter_encoder, filter_decoder)
@@ -155,7 +157,7 @@ class SkipThoughtDataset(BaseDataset):
 
     def load_pretrain_embedding(self):
         if self.embedding is None:
-            word_vector = gensim.downloader.load(PretrainModel)
+            word_vector = models.KeyedVectors.load_word2vec_format(PretrainModel, binary=True)
             embedding = []
             for i in self._dictionary.keys():
                 try:
@@ -179,7 +181,8 @@ if __name__ == '__main__':
                                     min_count=TRAIN_PARAMS['min_count'],
                                     max_count=TRAIN_PARAMS['max_count'],
                                     special_token=MySpecialToken,
-                                    max_len=TRAIN_PARAMS['max_decode_iter'])
+                                    max_len=TRAIN_PARAMS['max_decode_iter'],
+                                    min_len=TRAIN_PARAMS['min_len'])
     input_pipe.build_dictionary()
 
     print('Number of special token = {}'.format(input_pipe.special_size))

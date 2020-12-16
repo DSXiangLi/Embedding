@@ -12,6 +12,7 @@ TRAIN_PARAMS_UPDATE = {
     'epochs': 20,
     'dtype': tf.float32,
     'max_decode_iter': 8,
+    'min_len': 4,
     'beam_width': 1,
     'min_count': 2,
     'max_count': 50000,
@@ -36,7 +37,7 @@ ED_PARAMS = {
     },
     'cnn': {
         'filters': [50] * 3,
-        'kernel_size': [3, 4, 5],
+        'kernel_size': [2, 3, 4 ], # max kernel size must be smaller than min_len
         'strides': [1] * 3,
         'padding': ['VALID'] * 3,
         'activation': [tf.nn.tanh] * 3,
