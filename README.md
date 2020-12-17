@@ -4,24 +4,20 @@
 
 #### 1. Word2vec Demo 
 bash data/sogou_news_big/extract_file.sh
-
 python word2vec/main.py --model SG --train_algo HS  [Skip-gram Hierarchy Softmax]
 
 #### 2. fasttext classification Demo
 python data/quora_fasttext/data_preprocess.py
-
 python fasttext/main.py --gpu 1 [allow using gpu in tf.estimator]
 
 #### 3. Doc2vec Demo and Comparison with Word2vec
 bash data/sogou_news_big/extract_file.sh
-
 bash doc2vec/model_run.sh
-
 Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 
 #### 4. Skip-thought/Quick-thought大家族 Demo
 bash data/bookcorpus/run.sh
-
+bash skip_thought/download_pretrain.sh
 python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick_thought] --cell_type[gru_gru, cnn_gru, cnn_lstm]
 
 
