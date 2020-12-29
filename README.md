@@ -48,7 +48,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [FastSent|DVAE]Learning Distributed Representations of Sentences from Unlabelled Data (2016)
 - [Siamese] Learning Text Similarity with Siamese Recurrent Networks (2016)
 - [InferSent] Supervised Learning of Universal Sentence Representations from Natural Language Inference Data (2018)
-- [MTL] LEARNING GENERAL PURPOSE DISTRIBUTED SENTENCE REPRESENTATIONS VIA LARGE SCALE MULTITASK LEARNING (2018)
+- [SenGen] LEARNING GENERAL PURPOSE DISTRIBUTED SENTENCE REPRESENTATIONS VIA LARGE SCALE MULTITASK LEARNING (2018)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
