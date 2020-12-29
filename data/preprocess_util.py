@@ -114,11 +114,10 @@ class StrUtils(object):
             return tokens
 
 
-def dump_dictionary(output_path, sentences, prefix = '', debug=False):
+def dump_dictionary(output_path, sentences, prefix = '', debug=False, dry_run=False):
     dict = collections.Counter(itertools.chain.from_iterable(sentences))
-    with open('{}/{}dictionary.pkl'.format(output_path, prefix), 'wb') as f:
-        pickle.dump(dict, f )
+    if not dry_run:
+        with open('{}/{}dictionary.pkl'.format(output_path, prefix), 'wb') as f:
+            pickle.dump(dict, f )
     if debug:
         print(list(dict.most_common(10)))
-
-## all exception raise
