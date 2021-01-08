@@ -10,7 +10,7 @@ import tensorflow as tf
 from collections import namedtuple
 import tensorflow.contrib.seq2seq as seq2seq
 
-from skip_thought.seq2seq_utils import build_rnn_cell, embedding_func
+from encoder_decodeer_helper.tools import build_rnn_cell, embedding_func
 from skip_thought.bridge import bridge
 
 DECODER_OUTPUT = namedtuple('DecoderOutput', ['output', 'state', 'seq_len'])
@@ -52,7 +52,7 @@ def decoder(encoder_output, input_emb, input_len, embedding, params, mode):
     elif mode == tf.estimator.ModeKeys.EVAL:
         max_iteration = tf.reduce_max(input_len) # decode max sequence length(=padded_length)in EVAL
     else:
-        max_iteration = params['max_decode_len']  # decode pre-defined max_decode iter in predict
+        max_iteration = params['max_decode_iter']  # decode pre-defined max_decode iter in predict
 
     output_layer = tf.layers.Dense(units=params['vocab_size'])
 

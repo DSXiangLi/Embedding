@@ -26,7 +26,7 @@ def main(data_dir, const_dir, language):
     preprocess = StrUtils(os.path.join(const_dir, language), language)
 
     print('Reading Raw corpus in {}'.format(input_path))
-    sentences = preprocess.readline(input_path)
+    sentences =
 
     print('String Preprocessing and word Segmentation')
     sentences = preprocess.text_cleaning(sentences)

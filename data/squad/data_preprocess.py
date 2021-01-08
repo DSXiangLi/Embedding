@@ -49,12 +49,24 @@ def main(data_dir, const_dir, language, surfix):
     answer = preprocess.multi_word_cut(answer)
 
     print('Writing QA into encoder and decoder source at {}'.format(data_dir))
+    dup = {}
+
     with open(encoder_path, 'w', encoding='utf-8') as fe, open(decoder_path, 'w', encoding='utf-8') as fd:
         for encoder_source, decoder_source in zip(question, answer):
-            fe.write(' '.join(encoder_source).lower())
-            fe.write('\n')
-            fd.write(' '.join(decoder_source).lower())
-            fd.write('\n')
+            if len(encoder_source)>0 and len(decoder_source) >0:
+                enc = ' '.join(encoder_source).lower()
+                dec = ' '.join(decoder_source).lower()
+                if enc in dup:
+                    if dec in dup[enc]:
+                        continue
+                    else:
+                        dup[enc].append(dec)
+                else:
+                    dup[enc] = [dec]
+                fe.write(enc)
+                fe.write('\n')
+                fd.write(dec)
+                fd.write('\n')
 
     print('Dumping Original Dictionary')
     dump_dictionary(data_dir, question+answer, debug=True, dry_run=(surfix != 'train'))# only dump dictionry for train

@@ -87,8 +87,9 @@ def get_available_gpus():
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
-def build_model_fn_from_class(model_class):
+def build_model_fn_from_class(model_class, **kwargs):
     def model_fn(features, labels, mode, params):
-        model_cls = model_class(params)
+        # params is passed during run time
+        model_cls = model_class(params, **kwargs)
         return model_cls.build_model(features, labels, mode)
     return model_fn

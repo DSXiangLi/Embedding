@@ -1,6 +1,6 @@
 # -*- coding=utf-8 -*-
 import tensorflow as tf
-from config.default_config import SpecialSeqToken, RUN_CONFIG, TRAIN_PARAMS
+from config.default_config import SpecialSeqToken, RUN_CONFIG, TRAIN_PARAMS, ModelGN300
 
 MySpecialToken = SpecialSeqToken(SEQ_START = '<GO>',
                                  SEQ_END = '<EOS>',
@@ -22,7 +22,8 @@ TRAIN_PARAMS_UPDATE = {
     'clip_gradient': True,
     'rate_decay': False,
     'bridge_needed': True, # If encoder & decoder has same cell and shape, turn to False
-    'context_size': 3 # needed in the Quick thought label generation
+    'context_size': 3,
+    'pretrain_model': ModelGN300
 }
 
 
@@ -50,3 +51,4 @@ ED_PARAMS = {
         'keep_prob': [0.9]
     }
 }
+
