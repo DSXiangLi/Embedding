@@ -76,3 +76,9 @@ s[0].h # each has shape = batch * hidden = 2 * 10
 s[0].c
 cell.state_size # tuple of length =2, element = LSTMStateTuple(c=10, h=10)
 
+paper/An Empirical Evaluation of doc2vec with Practical Insights into Document Embedding Generation.pdf
+paper/How Contextual are Contextualized Word Representations? Comparing the Geometry of BERT, ELMo, and GPT-2 Embeddings.pdf
+paper/Understanding Word2Vec and Paragraph2Vec.pdf
+paper/[quick-thought] QuickThought_AN EFFICIENT FRAMEWORK FOR LEARNING SENTENCE REPRESENTATIONS.pdf
+paper/[skipthouguht] skip thoughts.pdf
+paper/How Contextual are Contextualized Word Representations? Comparing the Geometry of BERT, ELMo, and GPT-2 Embeddings.pdf

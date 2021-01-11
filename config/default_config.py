@@ -1,4 +1,5 @@
 import tensorflow as tf
+import os
 from collections import namedtuple
 from utils import get_available_gpus
 
@@ -63,3 +64,6 @@ def set_encoder_decoder_params(model, params, ed_params):
 SpecialSeqToken = namedtuple('SpecialToken', ['SEQ_START', 'SEQ_END', 'UNK', 'PAD'])
 SpecialWordToken = namedtuple('SpecialToken', ['UNK', 'PAD'])
 
+
+PretrainModelDir = './data/pretrain_model'
+ModelGN300 = os.path.join(PretrainModelDir, 'GoogleNews-vectors-negative300.bin')
