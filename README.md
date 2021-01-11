@@ -34,7 +34,7 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [Word2Vec] word2vec Explained: Deriving Mikolov et al.’s Negative-Sampling Word-Embedding Method (2014)
 - [Word2Vec] word2vec Parameter Learning Explained (2016)
 - [Fasttext] Enriching Word Vectors with Subword Information (Facebook 2017)
-- [Fasttext] [Fasttext]Bag of Tricks for Efficient Text Classification (Facebook 2016)
+- [Fasttext] Bag of Tricks for Efficient Text Classification (Facebook 2016)
 - [Glove] Global Vectors for Word Representation (2014)
 - [ELMo] Deep contextualized word representations (2018)
 #### 文本向量
@@ -48,12 +48,17 @@ python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick
 - [FastSent|DVAE]Learning Distributed Representations of Sentences from Unlabelled Data (2016)
 - [Siamese] Learning Text Similarity with Siamese Recurrent Networks (2016)
 - [InferSent] Supervised Learning of Universal Sentence Representations from Natural Language Inference Data (2018)
-- [SenGen] LEARNING GENERAL PURPOSE DISTRIBUTED SENTENCE REPRESENTATIONS VIA LARGE SCALE MULTITASK LEARNING (2018)
+- [GenSen] LEARNING GENERAL PURPOSE DISTRIBUTED SENTENCE REPRESENTATIONS VIA LARGE SCALE MULTITASK LEARNING (2018)
 - [USE] Universal Sentence Encoder (Google 2018)
 - [ULMFit] Universal Language Model Fine-tuning for Text Classification (fastai 2018)
 - [GPT] Improving Language Understanding by Generative Pre-Training (openai 2018)
 - [Bert] Pre-training of Deep Bidirectional Transformers for Language Understanding（Google 2019)
 - [Sentence-BERT] Sentence Embeddings using Siamese BERT-Networks (2019)
+- [Bert-flow] On the Sentence Embedding from Pre-trained Language Model(2020)
+- [Representation] Fine-Grained Analysis of Sentence Embedding Using Auxiliary Prediction Tasks (2017)
+- [Representation] What you can cram into a single vector: Probing Sentence Embedding for linguistic properties(2018)
+- [Representation] Assessing Composition in Sentence Vector Representations (2018)
+
 #### 物品向量
 - [Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)
 - [Airbnb] Real-time Personalization using Embeddings for Search Ranking at Airbnb (Airbnb 2018)
