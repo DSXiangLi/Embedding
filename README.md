@@ -19,12 +19,14 @@ bash doc2vec/model_run.sh
 
 Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 
-#### 4. Skip-thought/Quick-thought大家族 Demo
-bash data/bookcorpus/run.sh
+#### 4. Encoder-Decoder Family
+数据： bash data/bookcorpus/run.sh
 
-bash skip_thought/download_pretrain.sh
+预训练词向量： bash data/pretrain_model/download_pretrain.sh
 
-python skip_thought/main.py --clear_model 0 --gpu 1  --model[skip_thought, quick_thought] --cell_type[gru_gru, cnn_gru, cnn_lstm]
+老代码在skip_thought_archived, 重构代码
+
+skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
 
 
 ### Paper List 
