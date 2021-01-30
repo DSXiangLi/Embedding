@@ -48,11 +48,14 @@ def main(data_dir, const_dir, language, surfix):
     answer = preprocess.text_cleaning([i['answer'] for i in record if not i['is_impossible']])
     answer = preprocess.multi_word_cut(answer)
 
+    qa = zip(question, answer)
+    qa = sorted(qa, key= lambda x: len(x[0])) # sort train sample using question len
+
     print('Writing QA into encoder and decoder source at {}'.format(data_dir))
     dup = {}
 
     with open(encoder_path, 'w', encoding='utf-8') as fe, open(decoder_path, 'w', encoding='utf-8') as fd:
-        for encoder_source, decoder_source in zip(question, answer):
+        for encoder_source, decoder_source in qa:
             if len(encoder_source)>0 and len(decoder_source) >0:
                 enc = ' '.join(encoder_source).lower()
                 dec = ' '.join(decoder_source).lower()

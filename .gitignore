@@ -23,4 +23,9 @@ venv/*
 data/bookcorpus/out_txts/*
 data/bookcorpus/*.pkl
 data/bookcorpus/*.txt
+data/bookcorpus/*.jsonl
+
 data/*.txt
+data/squad/*.pkl
+data/squad/*.txt
+data/squad/*.json
