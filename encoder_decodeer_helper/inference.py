@@ -34,11 +34,11 @@ def avg_encode_inference(encoder_output, decoder_output, features, labels):
 
 def last_encode_inference(encoder_output, decoder_output, features, labels):
     """
-    vectorization used in skip_thought
+    vectorization used in skip_thought_archived
     use last hidden state in encoder as representation
     """
     with tf.variable_scope('last_encode_inference'):
-        vector = encoder_output.state
+        vector = encoder_output.state[0]
         result = base_inference(features, labels)
         result['vector'] = vector
     return result
@@ -49,7 +49,7 @@ def last_encode_decode_inference(encoder_output, decoder_output, features, label
     vectorization used in quick thought
     concat last hidden state in encoder and decoder as representation
     """
-    vector = tf.concat(encoder_output.state, decoder_output.state, axis=-1)
+    vector = tf.concat(encoder_output.state[0], decoder_output.state[0], axis=-1)
     result = base_inference(features, labels)
     result['vector'] = vector
     return result

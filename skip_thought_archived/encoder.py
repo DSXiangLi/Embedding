@@ -1,14 +1,20 @@
+# -*- coding=utf-8 -*-
 """
-Encoder Collection
-1. rnn encoder: can be rnn, gru, lstm
-2. cnn encoder
-"""
+Encoder Collectionn
+    1. gru encoder
+    2. cnn encoder
 
+"""
 import tensorflow as tf
-from encoder_decodeer_helper.tools import build_rnn_cell, ENCODER_OUTPUT
+from collections import namedtuple
+
+from skip_thought_archived.seq2seq_utils import encoder_decoder_collection, build_rnn_cell
+
+ENCODER_OUTPUT = namedtuple('EncoderOutput', ['output', 'state'])
 
 
-def rnn_encoder(input_emb, input_len, params):
+@encoder_decoder_collection('gru_encoder')
+def gru_encoder(input_emb, input_len, params):
     cell = build_rnn_cell(params['encoder_cell'], params['encoder_cell_params'])
 
     # state: batch_size * hidden_size, output: batch_size * max_len * hidden_size
@@ -23,7 +29,8 @@ def rnn_encoder(input_emb, input_len, params):
     return ENCODER_OUTPUT(output=output, state=state)
 
 
-def cnn_encoder(input_emb, params):
+@encoder_decoder_collection('cnn_encoder')
+def cnn_encoder(input_emb, input_len, params):
     # batch_szie * seq_len * emb_size -> batch_size * (seq_len-kernel_size + 1) * filters
     outputs = []
     params = params['encoder_cell_params']
@@ -34,8 +41,14 @@ def cnn_encoder(input_emb, params):
                                   strides = params['strides'][i],
                                   padding = params['padding'][i]
                                 )
+        output = params['activation'][i](output)
+        ## TODO: dropout, but dropout in convolution is questionable. BN maybe?
         # batch_size * (seq_len-kernel_size + 1) * filters -> batch_size * filters
         outputs.append(tf.reduce_max(output, axis=1))
     # batch_size * sum(filters)
     output = tf.concat(outputs, axis=1)
     return ENCODER_OUTPUT(output=output, state=(output,))
+
+
+##TODO: add bi-directional encoder
+##TODO: add attention

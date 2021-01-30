@@ -1,15 +1,22 @@
+# -*- coding=utf-8 -*-
 """
 Decoder Collection
-1. conditonal gru decoder
-2. lstm decoder
+    1. gru decoder
+    2. lstm decoder
+    3. bi-lstm decoder
+    4. all above with attention wrapepr
 """
-
 import tensorflow as tf
+from collections import namedtuple
 import tensorflow.contrib.seq2seq as seq2seq
-from encoder_decodeer_helper.tools import build_rnn_cell, bridge, DECODER_OUTPUT
+
+from skip_thought_archived.seq2seq_utils import build_rnn_cell, embedding_func
+from skip_thought_archived.bridge import bridge
+
+DECODER_OUTPUT = namedtuple('DecoderOutput', ['output', 'state', 'seq_len'])
 
 
-def get_helper(encoder_output, input_emb, input_len, embedding_func, mode, params):
+def get_helper(encoder_output, input_emb, input_len, embedding, mode, params):
     batch_size = tf.shape(encoder_output.output)[0]
 
     if mode == tf.estimator.ModeKeys.TRAIN:
@@ -30,28 +37,26 @@ def get_helper(encoder_output, input_emb, input_len, embedding_func, mode, param
                                          time_major=False,
                                          name='training_helper' )
     else:
-        helper = seq2seq.GreedyEmbeddingHelper( embedding=embedding_func,
-                                                start_tokens=tf.fill([batch_size], params['start_index']),
-                                                end_token=params['end_index'] )
+        helper = seq2seq.GreedyEmbeddingHelper( embedding=embedding_func( embedding ),
+                                                start_tokens=tf.fill([batch_size], params['start_token']),
+                                                end_token=params['end_token'] )
 
     return helper
 
 
-def decoder(encoder_output, labels, embedding_func, params, mode):
+def decoder(encoder_output, input_emb, input_len, embedding, params, mode):
     decoder_cell = build_rnn_cell( params['decoder_cell'], params=params['decoder_cell_params'])
 
     if mode == tf.estimator.ModeKeys.TRAIN:
-        seq_emb_input = embedding_func(labels['tokens'])  # batch_size * max_len * emb_size
-        input_len = labels['seq_len']
         max_iteration = None
+    elif mode == tf.estimator.ModeKeys.EVAL:
+        max_iteration = tf.reduce_max(input_len) # decode max sequence length(=padded_length)in EVAL
     else:
-        max_iteration = params['max_len'] # decode pre-defined max_decode iter in predict
-        seq_emb_input = None
-        input_len = None
+        max_iteration = params['max_decode_len']  # decode pre-defined max_decode iter in predict
 
     output_layer = tf.layers.Dense(units=params['vocab_size'])
 
-    helper = get_helper(encoder_output, seq_emb_input, input_len, embedding_func, mode, params)
+    helper = get_helper(encoder_output, input_emb, input_len, embedding, mode, params)
 
     # IF encoder_cell==decoder_cell no bridge needed
     if params.get('bridge_needed', False):
