@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 
 from encoder_decodeer_helper.tools import seq_mask_gen
+from utils import add_layer_summary
 
 
 def layer_norm(x):
@@ -36,7 +37,8 @@ def ffn(x, params, mode):
     """
     with tf.variable_scope('ffn', reuse=tf.AUTO_REUSE):
         d_model = x.shape.as_list()[-1]  # emb_size
-        y = tf.layers.dense(x, units=d_model, activation='relu')
+        y = tf.layers.dense(x, units=params['ffn_hidden'], activation='relu')
+        add_layer_summary('ffn_hidden', y)
         y = tf.layers.dense(y, units=d_model, activation=None)
         y = tf.layers.dropout(y, rate=params['dropout_rate'],
                               training=(mode == tf.estimator.ModeKeys.TRAIN))
@@ -55,9 +57,9 @@ def future_mask_gen(input_, params):
         mask:  batch_size * input_len * input_len, with 1 to keep, 0 to drop
     """
     # give 0 to all padding position for both key and query
-    seq_mask = seq_mask_gen(input_, params)
+    seq_mask = seq_mask_gen(input_, params) # batch_size * 1 * key_len
     # batch_size * key_len * key_len(seq_len)
-    mask = tf.matmul(seq_mask, seq_mask, transpose_b=True)
+    mask = tf.matmul(seq_mask, seq_mask, transpose_a=True) # batch_size * key_len * key_len
     # keep upper triangle with diagonal
     mask = tf.matrix_band_part(mask, num_lower=0, num_upper=-1)
 
@@ -80,7 +82,7 @@ def scaled_dot_product_attention(key, value, query, mask):
         dk = key.shape.as_list()[-1] # emb_size
         weight = tf.matmul(query, tf.transpose(key, [0, 2, 1]))/(dk**0.5)
 
-        # apply mask: large negative will become 0 in softmax
+        # apply mask: large negative will become 0 in softmax[mask=0 ignore]
         weight += (1-mask) * (-2**32+1)
 
         # normalize on axis key_len so that score add up to 1
@@ -135,28 +137,45 @@ def multi_head_attention(key, value, query, mask, params, mode):
     return weighted_val
 
 
-def positional_encoding(x):
+def positional_encoding(d_model, max_len, dtype):
     """
     inject relative and absolute position information
     inputs:
         x: batch_size * pad_len * emb_size
     output:
-        encoding: pad_lenn * emb_size
+        encoding: max_len * emb_size
     """
-    with tf.variable_scope('positional_encoding', reuse=tf.AUTO_REUSE):
-        d_model = x.shape.as_list()[-1]
-        seq_len = x.shape.as_list()[-2]
-
+    with tf.variable_scope('positional_encoding'):
         encoding_row = np.array([10000**((i//2)/d_model) for i in range(d_model)])
-        encoding_matrix = np.array([i/encoding_row for i in range(seq_len)])
+        encoding_matrix = np.array([i/encoding_row for i in range(max_len)])
 
         def sin_cos(row):
             row = [np.cos(val) if i%2 else np.sin(val) for i, val in enumerate(row)]
             return row
 
         encoding_matrix = np.apply_along_axis(sin_cos, 1, encoding_matrix)
-        encoding_matrix = tf.constant(encoding_matrix)
+        encoding_matrix = tf.cast(tf.constant(encoding_matrix), dtype)
 
     return encoding_matrix
 
 
+def init_input_embedding(embedding, pos_encoding, params):
+    def helper(tokens, mode):
+        batch_size = tf.shape(tokens)[0]
+        pad_len = tf.shape(tokens)[1]
+        pos_id = tf.tile(tf.expand_dims(tf.range(pad_len), 0), [batch_size, 1]) # batch_size * padded_len
+
+        seq_emb_input = tf.nn.embedding_lookup(embedding, tokens) + tf.nn.embedding_lookup(pos_encoding, pos_id )
+
+        seq_emb_input = tf.layers.dropout(seq_emb_input, rate=params['dropout_rate'],
+                                          training=(mode == tf.estimator.ModeKeys.TRAIN))
+        return seq_emb_input
+    return helper
+
+
+if __name__ == '__main__':
+    PE = positional_encoding(d_model=300, max_len=10)
+    PE = tf.cast(PE, tf.float32)
+    func = init_input_embedding(PE, PE, {'dtype':tf.float32, 'dropout_rate':0.1})
+
+    func(tf.constant([[1,2,3,4], [2,3,4,5]]), tf.estimator.ModeKeys.TRAIN)
