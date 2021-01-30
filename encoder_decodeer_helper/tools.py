@@ -1,4 +1,5 @@
 # -*- coding=utf-8 -*-
+import numpy as np
 import tensorflow as tf
 from collections import namedtuple
 from tensorflow.python.util import nest

@@ -40,10 +40,15 @@ def agg_sequence_loss(loss_mat, mask,  axis):
 
 
 def sequence_loss(encoder_output, decoder_output, labels, params):
+    """
+    seq2seq loss, eval teacher forcing predict on each token
+    Label: remove first token, which is <go>
+    predict: remove last token, which is beyond <eos>
+    """
     with tf.variable_scope('sequence_loss'):
         # batch_size * decode_len * vocab_size -> (batch_size * decode_len) * vocab_size
-        n_class = tf.shape(decoder_output.output)[2]
-        logits = tf.reshape(decoder_output.output[:, :-1, :], [-1, n_class])
+        n_class = tf.shape(decoder_output.output.rnn_output)[2]
+        logits = tf.reshape(decoder_output.output.rnn_output[:, :-1, :], [-1, n_class])
 
         # in train mode, target is decoder target with <start> token removed
         labels['tokens'] = labels['tokens'][:, 1:]

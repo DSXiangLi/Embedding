@@ -25,8 +25,8 @@ def get_helper(encoder_output, input_emb, input_len, embedding_func, mode, param
 
             input_emb = tf.concat([encoder_state, input_emb], axis=-1)
 
-        helper = seq2seq.TrainingHelper( inputs=input_emb, # batch_size * max_len-1 * emb_size
-                                         sequence_length=input_len-1, # exclude last token
+        helper = seq2seq.TrainingHelper( inputs=input_emb, # batch_size * max_len * emb_size
+                                         sequence_length=input_len, # exclude last token
                                          time_major=False,
                                          name='training_helper' )
     else:
@@ -69,4 +69,4 @@ def decoder(encoder_output, labels, embedding_func, params, mode):
                                                     impute_finished=True,
                                                     maximum_iterations=max_iteration)
 
-    return DECODER_OUTPUT(output=output, state = state, seq_len=seq_len)
+    return DECODER_OUTPUT(output=output, state=state, seq_len=seq_len)
