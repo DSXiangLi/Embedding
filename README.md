@@ -24,9 +24,11 @@ Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 
 预训练词向量： bash data/pretrain_model/download_pretrain.sh
 
-老代码在skip_thought_archived, 重构代码
+老代码在skip_thought_archived, 重构代码如下
 
 skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
+
+cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 
 
 ### Paper List 
