@@ -10,23 +10,25 @@ def normalize(vector: np.ndarray):
     return vector / norm
 
 
-with open('./data/bookcorpus/quick_thought_predict_embedding.pkl', 'rb') as f:
+with open('./data/bookcorpus/skip_thought_predict.pkl', 'rb') as f:
     res = pickle.load(f)
 
 
-seqs = np.array(list(res.keys()))
-embedding = np.array(list(res.values()))
-embedding = np.apply_along_axis(normalize, 1, embedding)
+seqs = np.array([' '.join( [i.decode('utf-8') for i in item['input_token']]) for item in res])
+sentence_embedding = dict(zip(seqs, [item['vector'] for item in res]))
+
+all_embedding = np.array([item['vector'] for item in res ])
+all_embedding = np.apply_along_axis(normalize, 1, all_embedding)
 
 
 def find_topn_most_similar(sentence, topn):
-    emb = np.array(res[sentence])
+    emb = sentence_embedding[sentence]
 
     emb = normalize(emb)
 
-    sim = np.matmul(np.expand_dims(emb, axis=0), embedding.transpose())
+    sim = np.matmul(np.expand_dims(emb, axis=0), all_embedding.transpose())
 
-    items = np.squeeze(np.argsort(sim, axis=1)[:, -topn:])
+    items = np.squeeze(np.argsort(sim, axis=1)[:, (-topn-1):-1])
 
     scores = np.squeeze(sim[:, items])
 
@@ -37,7 +39,7 @@ def find_topn_most_similar(sentence, topn):
 
 topn = 2
 
-for i in range(100):
+for i in range(50):
     print('\n Finding Top {} for "{}" '.format(topn, seqs[i]))
 
     find_topn_most_similar(seqs[i], topn)

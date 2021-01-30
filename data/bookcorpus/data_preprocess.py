@@ -1,5 +1,7 @@
 
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 from data.preprocess_util import *
 
 
@@ -20,29 +22,41 @@ def make_triplet(sentences):
 
 def main(data_dir, const_dir, language):
     input_path = '{}/all.tokenized.txt'.format( data_dir )
-    encoder_path = '{}/encoder_source.txt'.format( data_dir )
-    decoder_path = '{}/decoder_source.txt'.format(data_dir)
+    train_encoder_path = '{}/train_encoder_source.txt'.format( data_dir )
+    train_decoder_path = '{}/train_decoder_source.txt'.format(data_dir)
+
+    dev_encoder_path = '{}/dev_encoder_source.txt'.format( data_dir )
+    dev_decoder_path = '{}/dev_decoder_source.txt'.format(data_dir)
 
     preprocess = StrUtils(os.path.join(const_dir, language), language)
 
     print('Reading Raw corpus in {}'.format(input_path))
-    sentences =
+    sentences = preprocess.readline(input_path)
 
     print('String Preprocessing and word Segmentation')
     sentences = preprocess.text_cleaning(sentences)
     sentences = preprocess.multi_word_cut(sentences)
-    sentences = [i for i in sentences if (len(i) <=10) and (len(i)>=3)]
 
     with open('{}/all_sentences.txt'.format(data_dir), 'w', encoding='utf-8') as f:
         for line in sentences:
             f.write(' '.join(line).lower())
             f.write('\n')
+
     print('Making Triplets out of clean corpus')
     train_sample = make_triplet(sentences)
+    train_sample = shuffle(train_sample)
+    train, dev = train_test_split(train_sample, test_size=0.2, random_state=1234)
 
     print('Writing triplets into encoder and decoder source at'.format(data_dir))
-    with open(encoder_path, 'w', encoding='utf-8') as fe, open(decoder_path, 'w', encoding='utf-8') as fd :
-        for encoder_source, decoder_source in train_sample:
+    with open(train_encoder_path, 'w', encoding='utf-8') as fe, open(train_decoder_path, 'w', encoding='utf-8') as fd :
+        for encoder_source, decoder_source in train:
+            fe.write(' '.join(encoder_source).lower())
+            fe.write('\n')
+            fd.write(' '.join(decoder_source).lower())
+            fd.write('\n')
+
+    with open(dev_encoder_path, 'w', encoding='utf-8') as fe, open(dev_decoder_path, 'w', encoding='utf-8') as fd :
+        for encoder_source, decoder_source in train:
             fe.write(' '.join(encoder_source).lower())
             fe.write('\n')
             fd.write(' '.join(decoder_source).lower())
@@ -53,4 +67,7 @@ def main(data_dir, const_dir, language):
 
 
 if __name__ == '__main__':
-    main( 'data/bookcorpus', 'const', 'en' )
+    data_dir = 'data/bookcorpus'
+    const_dir = 'const'
+    language = 'en'
+    main( data_dir, const_dir, language)

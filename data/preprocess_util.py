@@ -88,7 +88,7 @@ class StrUtils(object):
                 return [i for i in line if ((not i.isdigit()) and (i not in self.stop_words )) ]
         else:
             def func(line):
-                return [i for i in line.split(" ") if ((not i.isdigit()) and \
+                return [i.lower() for i in line.split(" ") if ((not i.isdigit()) and \
                                                        (i not in self.stop_words) and \
                                                        (len(i) >1 ) )]
 

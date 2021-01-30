@@ -40,11 +40,17 @@ def build_estimator(params, model_dir, model_fn, gpu_enable, RUN_CONFIG):
         train_distribute=mirrored_strategy, eval_distribute=None
     )
 
+    if os.path.isdir(model_dir):
+        warm_start_dir = model_dir
+    else:
+        warm_start_dir = None
+
     estimator = tf.estimator.Estimator(
         model_fn=model_fn,
         config=run_config,
         params=params,
-        model_dir=model_dir
+        model_dir=model_dir,
+        warm_start_from=warm_start_dir
     )
 
     return estimator
