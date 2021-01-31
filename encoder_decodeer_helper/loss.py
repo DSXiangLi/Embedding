@@ -62,13 +62,14 @@ def sequence_loss(encoder_output, decoder_output, labels, params):
     return agg_sequence_loss(loss_mat, mask, axis='scaler')
 
 
-def neighbour_cls_loss(encoder_output, decoder_output, labels, params, sim_func):
+def neighbour_cls_loss(encoder_output, decoder_output, labels, params):
     """
-    Quick thought like loss function: source is continuous setence, target are the same as input.
+    Quick thought like loss function: source is continuous sentence, target are the same as input.
     positive samples are the pair within widonw_size around diagonal, all the other sample in batch are negative sample
     """
-    sim_score = sim_func(encoder_output, decoder_output)
-    add_layer_summary(sim_score.name , sim_score)
+    sim_score = tf.matmul(encoder_output.state[0], decoder_output.state[0],
+                          transpose_b=True)  # [batch, batch] sim score
+    add_layer_summary(sim_score.name, sim_score)
 
     with tf.variable_scope('neighbour_similarity_loss'):
         batch_size = sim_score.get_shape().as_list()[0]
@@ -76,7 +77,7 @@ def neighbour_cls_loss(encoder_output, decoder_output, labels, params, sim_func)
 
         # create targets: set element within diagonal offset to 1
         targets = np.zeros(shape=(batch_size, batch_size))
-        offset = params['context_size']//2  ## offset of the diagonal
+        offset = params['window_size']  ## offset of the diagonal
         for i in chain(range(1, 1+offset), range(-offset, -offset+1)):
             diag = np.diagonal(targets, offset=i)
             diag.setflags(write=True)

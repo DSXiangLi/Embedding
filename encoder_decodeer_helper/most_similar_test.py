@@ -2,16 +2,14 @@
 
 import pickle
 import numpy as np
+from encoder_decodeer_helper.tools import normalize
 
-def normalize(vector: np.ndarray):
-    norm = np.linalg.norm(vector)
-    if norm == 0:
-        norm = np.finfo(vector.dtype).eps
-    return vector / norm
+model = 'quick_thought'
+data = 'bookcorpus'
 
-
-with open('./data/bookcorpus/cnn_lstm_predict.pkl', 'rb') as f:
+with open('./data/{}/{}_predict.pkl'.format(data, model), 'rb') as f:
     res = pickle.load(f)
+
 
 seqs = np.array([' '.join( [i.decode('utf-8') for i in item['input_token']]) for item in res])
 sentence_embedding = dict(zip(seqs, [item['vector'] for item in res]))

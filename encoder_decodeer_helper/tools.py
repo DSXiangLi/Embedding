@@ -9,18 +9,11 @@ SEQ_PRED_OUTPUT = namedtuple('SEQ_PRED_OUTPUT', ['predict_prob', 'predict_id', '
 DECODER_OUTPUT = namedtuple('DecoderOutput', ['output', 'state', 'seq_len'])
 ENCODER_OUTPUT = namedtuple('EncoderOutput', ['output', 'state'])
 
-
-ENCODER_FAMILY = {}
-
-
-def encoder_decoder_collection(func_name):
-    def helper(func):
-        if 'encoder' in func_name:
-            ENCODER_FAMILY[func_name] = func
-        else:
-            raise Exception('Only encoder are supported in func_name')
-        return func
-    return helper
+def normalize(vector: np.ndarray):
+    norm = np.linalg.norm(vector)
+    if norm == 0:
+        norm = np.finfo(vector.dtype).eps
+    return vector / norm
 
 
 def build_rnn_cell(cell_type, params):
@@ -103,5 +96,4 @@ def bridge(encoder_output, decoder_cell):
 
         # possible packing state into namedtuple like LSTM to be same as decoder hidden state
         return nest.pack_sequence_as(decoder_cell.state_size, initial_state)
-
 
