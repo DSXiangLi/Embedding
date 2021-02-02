@@ -47,8 +47,8 @@ def sequence_loss(encoder_output, decoder_output, labels, params):
     """
     with tf.variable_scope('sequence_loss'):
         # batch_size * decode_len * vocab_size -> (batch_size * decode_len) * vocab_size
-        n_class = tf.shape(decoder_output.output.rnn_output)[2]
-        logits = tf.reshape(decoder_output.output.rnn_output[:, :-1, :], [-1, n_class])
+        n_class = tf.shape(decoder_output.output)[2]
+        logits = tf.reshape(decoder_output.output[:, :-1, :], [-1, n_class])
 
         # in train mode, target is decoder target with <start> token removed
         labels['tokens'] = labels['tokens'][:, 1:]
@@ -73,7 +73,7 @@ def neighbour_cls_loss(encoder_output, decoder_output, labels, params):
 
     with tf.variable_scope('neighbour_similarity_loss'):
         batch_size = sim_score.get_shape().as_list()[0]
-        sim_score = tf.matrix_set_diag(sim_score, np.zeros(batch_size))
+        sim_score = tf.matrix_set_diag(sim_score, np.zeros(batch_size))# ignore self-similarity
 
         # create targets: set element within diagonal offset to 1
         targets = np.zeros(shape=(batch_size, batch_size))
@@ -83,7 +83,7 @@ def neighbour_cls_loss(encoder_output, decoder_output, labels, params):
             diag.setflags(write=True)
             diag.fill(1)
 
-        targets = targets/np.sum(targets, axis=1, keepdims=True)
+        targets = targets/np.sum(targets, axis=1, keepdims=True) # normalize target probability to 1
 
         targets = tf.constant(targets, dtype=params['dtype'])
 

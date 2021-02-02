@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from utils import add_layer_summary, build_model_fn_from_class
 from encoder_decodeer_helper.base_encoder_decoder import BaseEncoderDecoder
-from encoder_decodeer_helper.tools import token2sequence
+from encoder_decodeer_helper.tools import token2sequence, DECODER_OUTPUT
 from encoder_decodeer_helper.loss import sequence_loss
 from encoder_decodeer_helper.encoder import cnn_encoder
 from encoder_decodeer_helper.decoder import decoder
@@ -36,7 +36,8 @@ class CNNLSTM(BaseEncoderDecoder):
                 tf.summary.text('decode_prediction',
                                 token2sequence(tf.cast(decoder_output.output.sample_id[0, :], tf.int32)))
 
-            return decoder_output
+            return DECODER_OUTPUT(output=decoder_output.output.rnn_output, state=decoder_output.state,
+                                  seq_len=decoder_output.seq_len)
 
 
 model_fn = build_model_fn_from_class(CNNLSTM,

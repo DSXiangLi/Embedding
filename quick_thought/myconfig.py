@@ -21,7 +21,6 @@ BOOKCORPUS_UPDATE = {
     'max_count': 50000,
     'learning_rate': 0.001,
     'clip_gradient': True,
-    'rate_decay': False,
     'pretrain_model': ModelGN300,
     'skip_decoder': True, # For quick thought, in predict mode no decoder is needed
     'window_size': 1, # positive label range

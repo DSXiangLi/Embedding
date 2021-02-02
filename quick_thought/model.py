@@ -21,8 +21,8 @@ class QuickThought(BaseEncoderDecoder):
 
             encoder_output = rnn_encoder(encoder_input, features['seq_len'], self.params)
 
-            add_layer_summary('encoder_output.state', encoder_output.state)
-            add_layer_summary('encoder_output.output', encoder_output.output)
+            add_layer_summary('state', encoder_output.state)
+            add_layer_summary('output', encoder_output.output)
 
         return encoder_output
 
@@ -31,11 +31,7 @@ class QuickThought(BaseEncoderDecoder):
         inner product decoder
         """
         with tf.variable_scope('decoding', reuse=tf.AUTO_REUSE):
-
             decoder_output = self.encode(labels, mode)
-
-            add_layer_summary('decoder_output.state', decoder_output.state)
-            add_layer_summary('decoder_output.output', decoder_output.output)
 
         return decoder_output
 
