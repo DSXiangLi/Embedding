@@ -45,7 +45,7 @@ def main(args):
                                 special_token=MySpecialToken,
                                 max_len=TRAIN_PARAMS['max_len'],
                                 min_len=TRAIN_PARAMS['min_len'],
-                                pretrain_model=TRAIN_PARAMS['pretrain_model']
+                                pretrain_model_list=TRAIN_PARAMS['pretrain_model_list']
                                 )
     input_pipe.build_dictionary()
 

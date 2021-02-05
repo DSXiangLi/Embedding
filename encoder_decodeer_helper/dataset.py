@@ -2,19 +2,19 @@
 
 import numpy as np
 import tensorflow as tf
-from gensim import models
+
 
 from BaseDataset import *
 
 
 class Seq2SeqDataset(BaseDataset):
     def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
-                 special_token, max_len, min_len, pretrain_model):
+                 special_token, max_len, min_len, pretrain_model_list):
         super(Seq2SeqDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
                                              max_count, special_token)
         self.max_len = max_len
         self.min_len = min_len
-        self.pretrain_model = pretrain_model
+        self.pretrain_model_list = pretrain_model_list
         self.embedding = None
         self.params_check()
 
@@ -154,19 +154,31 @@ class Seq2SeqDataset(BaseDataset):
 
     def load_pretrain_embedding(self):
         if self.embedding is None:
-            word_vector = models.KeyedVectors.load_word2vec_format(self.pretrain_model, binary=True)
+            embedding_retriever = self.get_word_vector(self.pretrain_model_list)
             embedding = []
             for i in self._dictionary.keys():
-                try:
-                    embedding.append(word_vector.get_vector(i))
-                except KeyError:
-                    embedding.append(np.random.uniform(low=-0.1, high=0.1, size=300))
+                embedding.append(embedding_retriever(i))
             self.embedding = np.array(embedding, dtype=np.float32)
         return self.embedding
 
+    @staticmethod
+    def get_word_vector(word_vector_list):
+        def helper(token):
+            embedding = None
+            for word_vector in word_vector_list:
+                try:
+                    embedding = word_vector.get_vector(token)
+                except KeyError:
+                    continue
+            if embedding is None:
+                embedding = np.random.uniform(low=-0.1, high=0.1, size=300)
+            return embedding
+        return helper
+
 
 if __name__ == '__main__':
-    from config.bookcorpus_config import MySpecialToken,TRAIN_PARAMS
+    from config.bookcorpus_config import MySpecialToken
+    from config.default_config import get_pretrain_model
     sess = tf.Session()
 
     data = 'bookcorpus'
@@ -175,15 +187,15 @@ if __name__ == '__main__':
                                     'decoder': './data/{}/train_decoder_source.txt'.format(data)
                                 },
                                 dict_file='./data/{}/dictionary.pkl'.format(data),
-                                epochs=TRAIN_PARAMS['epochs'],
+                                epochs=10,
                                 batch_size=50,
                                 buffer_size=128,
                                 min_count=2,
                                 max_count=50000,
                                 special_token=MySpecialToken,
                                 max_len=10,
-                                min_len=2,
-                                pretrain_model=TRAIN_PARAMS['pretrain_model']
+                                min_len=4,
+                                pretrain_model_list=[get_pretrain_model('gn300')]
     )
     input_pipe.build_dictionary()
 
@@ -200,3 +212,5 @@ if __name__ == '__main__':
     sess.run( tf.tables_initializer() )
     sess.run( tf.global_variables_initializer() )
     print(sess.run( iterator.get_next() ))
+
+    embedding = input_pipe.load_pretrain_embedding()

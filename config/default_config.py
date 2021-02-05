@@ -1,10 +1,14 @@
 import tensorflow as tf
 import os
+from functools import partial
 from collections import namedtuple
-from utils import get_available_gpus
+from gensim.models.fasttext import load_facebook_vectors
+from gensim import models
 
-ALL_DEVICES = get_available_gpus()
-NUM_DEVICES = 3
+os.environ["CUDA_VISIBLE_DEVICES"] ="7"
+ALL_DEVICES = ['/device:GPU:7']
+
+NUM_DEVICES = 1
 
 if len(ALL_DEVICES) > NUM_DEVICES:
     ALL_DEVICES = ALL_DEVICES[-NUM_DEVICES:]
@@ -18,7 +22,7 @@ TRAIN_PARAMS = {
     'emb_size': 50,
     'learning_rate': 0.01,
     'ng_sample': 25,
-    'buffer_size':128,
+    'buffer_size':20,
     'min_count': 5,
     'max_count': 10000,
     'decay_steps': -1,
@@ -66,4 +70,27 @@ SpecialWordToken = namedtuple('SpecialToken', ['UNK', 'PAD'])
 
 
 PretrainModelDir = './data/pretrain_model'
-ModelGN300 = os.path.join(PretrainModelDir, 'GoogleNews-vectors-negative300.bin')
+PretrainModel = {
+    'gn300': {
+        'model': None,
+        'path': os.path.join(PretrainModelDir, 'GoogleNews-vectors-negative300.bin'),
+        'loader': partial(models.KeyedVectors.load_word2vec_format, binary=True)
+    },
+    'ft300': {
+        'model': None,
+        'path': os.path.join(PretrainModelDir, 'cc.zh.300.bin'),
+        'loader': load_facebook_vectors
+    }
+}
+
+
+def get_pretrain_model(model_name):
+    global PretrainModel
+    if PretrainModel[model_name]['model'] is None:
+        model = PretrainModel[model_name]['loader'](PretrainModel[model_name]['path'])
+        PretrainModel[model_name]['model'] = model
+        return model
+    else:
+        return PretrainModel[model_name]['model']
+
+

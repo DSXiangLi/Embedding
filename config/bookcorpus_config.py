@@ -1,6 +1,6 @@
 # -*- coding=utf-8 -*-
 import tensorflow as tf
-from config.default_config import SpecialSeqToken, RUN_CONFIG, TRAIN_PARAMS, ModelGN300
+from config.default_config import SpecialSeqToken, RUN_CONFIG, TRAIN_PARAMS
 
 MySpecialToken = SpecialSeqToken(SEQ_START = '<GO>',
                                  SEQ_END = '<EOS>',
@@ -22,8 +22,7 @@ TRAIN_PARAMS_UPDATE = {
     'clip_gradient': True,
     'rate_decay': False,
     'bridge_needed': True, # If encoder & decoder has same cell and shape, turn to False
-    'context_size': 3,
-    'pretrain_model': ModelGN300
+    'context_size': 3
 }
 
 

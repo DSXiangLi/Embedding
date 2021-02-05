@@ -1,6 +1,6 @@
 # -*-coding:utf-8 -*-
 import tensorflow as tf
-from config.default_config import TRAIN_PARAMS, ModelGN300, RUN_CONFIG
+from config.default_config import TRAIN_PARAMS, get_pretrain_model, RUN_CONFIG
 
 RNN_CONFIG = {
     'cnn': {
@@ -38,7 +38,7 @@ BOOKCORPUS_UPDATE = {
     'clip_gradient': True,
     'rate_decay': False,
     'bridge_needed': True, # If encoder & decoder has same cell and shape, turn to False
-    'pretrain_model': ModelGN300,
+    'pretrain_model_list': [get_pretrain_model('gn300')],
     'skip_decoder': True,
     'decoder_cell': 'gru',
     'encoder_cell': 'cnn',

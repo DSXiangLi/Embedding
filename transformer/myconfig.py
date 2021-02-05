@@ -1,24 +1,21 @@
 # -*-coding:utf-8 -*-
 import tensorflow as tf
-from config.default_config import TRAIN_PARAMS, ModelGN300, RUN_CONFIG
+from config.default_config import TRAIN_PARAMS, get_pretrain_model, RUN_CONFIG
 
-BOOKCORPUS_UPDATE = {
+WMT_UPDATE = {
     'emb_size': 300,
     'epochs': 20,
+    'batch_size': 100,
     'dtype': tf.float32,
-    'max_len': 10,
+    'max_len': 20,
     'min_len': 4,
-    'min_count': 2,
-    'max_count': 50000,
-    'batch_size': 50,
-    'learning_rate': 0.001,
-    'clip_gradient': False,
-    'rate_decay': False,
+    'min_count': 3,
+    'max_count': 8000,
     'warmup': True,
     'warmup_steps': 10000,
-    'pretrain_model': ModelGN300,
-    'encode_attention_layers': 6,
-    'decode_attention_layers': 6,
+    'pretrain_model_list': [get_pretrain_model('gn300'), get_pretrain_model('ft300')],
+    'encode_attention_layers': 4,
+    'decode_attention_layers': 4,
     'num_head': 6,
     'ffn_hidden': 300,
     'dropout_rate': 0.1,
@@ -26,11 +23,11 @@ BOOKCORPUS_UPDATE = {
 }
 
 ALL_TRAIN_PARAMS = {
-    'bookcorpus': dict(TRAIN_PARAMS, **BOOKCORPUS_UPDATE)
+    'wmt': dict(TRAIN_PARAMS, **WMT_UPDATE)
 }
 
 ALL_RUN_CONFIG = {
-    'bookcorpus': RUN_CONFIG
+    'wmt': RUN_CONFIG
 }
 
 

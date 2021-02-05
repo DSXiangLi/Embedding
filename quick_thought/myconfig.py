@@ -1,6 +1,6 @@
 # -*-coding:utf-8 -*-
 import tensorflow as tf
-from config.default_config import TRAIN_PARAMS, ModelGN300, RUN_CONFIG
+from config.default_config import TRAIN_PARAMS, get_pretrain_model, RUN_CONFIG
 
 RNN_CONFIG = {
     'gru': {
@@ -21,7 +21,7 @@ BOOKCORPUS_UPDATE = {
     'max_count': 50000,
     'learning_rate': 0.001,
     'clip_gradient': True,
-    'pretrain_model': ModelGN300,
+    'pretrain_model_list': [get_pretrain_model('gn300')],
     'skip_decoder': True, # For quick thought, in predict mode no decoder is needed
     'window_size': 1, # positive label range
     'encoder_cell': 'gru',
