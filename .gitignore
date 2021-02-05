@@ -24,8 +24,10 @@ data/bookcorpus/out_txts/*
 data/bookcorpus/*.pkl
 data/bookcorpus/*.txt
 data/bookcorpus/*.jsonl
-
+data/pretrain_model/*.bin
 data/*.txt
 data/squad/*.pkl
 data/squad/*.txt
 data/squad/*.json
+data/wmt/*.pkl
+data/wmt/news*
