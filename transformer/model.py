@@ -23,8 +23,8 @@ class Transformer(BaseEncoderDecoder):
         super().init_embedding()  # batch * seq_len * emb_dim
 
         # scale embedding by d_model^0.5
-        d_model = tf.shape(self.embedding)[-1]
-        self.embedding = self.embedding / (tf.cast(d_model,  self.params['dtype'])**0.5 )
+        d_model = tf.cast(tf.shape(self.embedding)[-1], self.params['dtype'])
+        self.embedding = self.embedding * (d_model**0.5)
         self.pos_encoding = positional_encoding(d_model=self.params['emb_size'], max_len=self.params['max_len'],
                                                 dtype=self.params['dtype'])
 
@@ -38,7 +38,6 @@ class Transformer(BaseEncoderDecoder):
         """
         with tf.variable_scope('encoding', reuse=tf.AUTO_REUSE):
             encoder_input = self.embedding_func(features['tokens'], mode) # batch * seq_len * emb_size
-            add_layer_summary('encoder_input', encoder_input)
             self_mask = seq_mask_gen(features, self.params)
 
             for i in range(self.params['encode_attention_layers']):

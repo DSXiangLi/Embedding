@@ -14,9 +14,12 @@ def layer_norm(x):
     with tf.variable_scope('layer_normalization', reuse=tf.AUTO_REUSE):
         epsilon = tf.constant(np.finfo(np.float32).eps)
         mean, variance = tf.nn.moments(x, axes=-1, keep_dims=True)
-        x = (x - mean)/((variance + epsilon)**0.5)
+        x = (x - mean)/((variance + epsilon)**0.5) # do layer norm
+        add_layer_summary('layer_norm', x)
         x = tf.layers.dense(x, units=x.get_shape().as_list()[-1],
-                            activation=None, use_bias=True)
+                            kernel_initializer=tf.ones_initializer(),
+                            bias_initializer=tf.zeros_initializer(),
+                            activation=None) # add linear transformation after norm
     return x
 
 
@@ -27,7 +30,7 @@ def add_and_norm_layer(x, sub_layer_x):
     with tf.variable_scope('add_and_norm'):
         x = tf.add(x, sub_layer_x)
         x = layer_norm(x)
-
+        add_layer_summary('add_and_norm', x)
     return x
 
 
@@ -38,13 +41,13 @@ def ffn(x, params, mode):
     with tf.variable_scope('ffn', reuse=tf.AUTO_REUSE):
         d_model = x.shape.as_list()[-1]  # emb_size
         y = tf.layers.dense(x, units=params['ffn_hidden'], activation='relu')
-        add_layer_summary('ffn_hidden', y)
+
+        add_layer_summary('ffn_hidden1', y)
         y = tf.layers.dense(y, units=d_model, activation=None)
         y = tf.layers.dropout(y, rate=params['dropout_rate'],
                               training=(mode == tf.estimator.ModeKeys.TRAIN))
-
+        add_layer_summary('ffn_hidden2', y)
         y = add_and_norm_layer(x, y)
-
     return y
 
 
@@ -61,7 +64,7 @@ def future_mask_gen(input_, params):
     # batch_size * key_len * key_len(seq_len)
     mask = tf.matmul(seq_mask, seq_mask, transpose_a=True) # batch_size * key_len * key_len
     # keep upper triangle with diagonal
-    mask = tf.matrix_band_part(mask, num_lower=0, num_upper=-1)
+    mask = tf.matrix_band_part(mask, num_lower=-1, num_upper=0)
 
     return mask
 
@@ -79,15 +82,15 @@ def scaled_dot_product_attention(key, value, query, mask):
     """
     with tf.variable_scope('scaled_dot_product_attention', reuse=tf.AUTO_REUSE):
         # scalaed weight matrix : batch_size * query_len * key_len
-        dk = key.shape.as_list()[-1] # emb_size
-        weight = tf.matmul(query, tf.transpose(key, [0, 2, 1]))/(dk**0.5)
+        dk = tf.cast(key.shape.as_list()[-1], tf.float32)# emb_size
+        weight = tf.matmul(query, key, transpose_b=True)/(dk**0.5)
 
         # apply mask: large negative will become 0 in softmax[mask=0 ignore]
         weight += (1-mask) * (-2**32+1)
 
         # normalize on axis key_len so that score add up to 1
         weight = tf.nn.softmax(weight, axis=-1)
-
+        add_layer_summary('attention', weight)
         # weighted value: batch_size * query_len * emb_size
         weighted_value = tf.matmul(weight, value )
 
@@ -131,7 +134,7 @@ def multi_head_attention(key, value, query, mask, params, mode):
         # Do dropout
         weighted_val = tf.layers.dropout(weighted_val, rate=params['dropout_rate'],
                                          training=(mode == tf.estimator.ModeKeys.TRAIN))
-
+        add_layer_summary('raw_multi_head', weighted_val)
         weighted_val = add_and_norm_layer(query, weighted_val)
 
     return weighted_val
@@ -165,17 +168,42 @@ def init_input_embedding(embedding, pos_encoding, params):
         pad_len = tf.shape(tokens)[1]
         pos_id = tf.tile(tf.expand_dims(tf.range(pad_len), 0), [batch_size, 1]) # batch_size * padded_len
 
-        seq_emb_input = tf.nn.embedding_lookup(embedding, tokens) + tf.nn.embedding_lookup(pos_encoding, pos_id )
+        we = tf.nn.embedding_lookup(embedding, tokens)
+        pe = tf.nn.embedding_lookup(pos_encoding, pos_id)
+        add_layer_summary('raw_word_embedding', we)
+        add_layer_summary('raw_positional_encoding', pe)
 
-        seq_emb_input = tf.layers.dropout(seq_emb_input, rate=params['dropout_rate'],
+        seq_emb_input = tf.layers.dropout(we+pe, rate=params['dropout_rate'],
                                           training=(mode == tf.estimator.ModeKeys.TRAIN))
+        add_layer_summary('embedding_input', seq_emb_input)
         return seq_emb_input
     return helper
 
 
 if __name__ == '__main__':
-    PE = positional_encoding(d_model=300, max_len=10)
-    PE = tf.cast(PE, tf.float32)
-    func = init_input_embedding(PE, PE, {'dtype':tf.float32, 'dropout_rate':0.1})
+    import tensorflow as tf
+    sess = tf.Session()
 
+    ## visualize positional encoding
+    PE = positional_encoding(d_model=50, max_len=10, dtype=tf.float32)
+    PE = sess.run(PE)
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    ax = sns.heatmap(PE, cmap='coolwarm')
+    ax.set_xlabel('d_model')
+    ax.set_ylabel('max_len')
+    plt.show()
+
+    # check PE + embedding
+    func = init_input_embedding(PE, PE, {'dtype':tf.float32, 'dropout_rate':0.1})
     func(tf.constant([[1,2,3,4], [2,3,4,5]]), tf.estimator.ModeKeys.TRAIN)
+
+    # check mask
+    features = {'seq_len':[3,4,5], 'tokens':[[1,2,3,-1,-1],[2,3,4,5,-1],[3,4,5,6,7]]}
+    params = {'dtype':tf.float32}
+    seq_mask =seq_mask_gen(features, params)
+    sess.run(seq_mask)
+    seq_mask = tf.tile(seq_mask, [6, 1, 1])
+    sess.run(seq_mask)
+    future_mask = future_mask_gen(features, params)
+    future_mask = sess.run(future_mask)

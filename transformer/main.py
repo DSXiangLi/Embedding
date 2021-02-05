@@ -44,7 +44,7 @@ def main(args):
                                 special_token=MySpecialToken,
                                 max_len=TRAIN_PARAMS['max_len'],
                                 min_len=TRAIN_PARAMS['min_len'],
-                                pretrain_model=TRAIN_PARAMS['pretrain_model']
+                                pretrain_model_list=TRAIN_PARAMS['pretrain_model_list']
                                 )
     input_pipe.build_dictionary()
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, help='models: [skip_thought_archived|quick_thought]',
                         required=False, default='transformer')
     parser.add_argument('--data', type=str, help='which data to use[data should be list of tokenized string]',
-                        required=False, default='bookcorpus')
+                        required=False, default='wmt')
     parser.add_argument('--gpu', type=int, help='Whether to enable gpu',
                         required=False, default=0)
     args = parser.parse_args()
