@@ -22,7 +22,6 @@ class BaseEncoderDecoder(object):
             self.embedding = tf.get_variable(dtype=self.params['dtype'],
                                              initializer=tf.constant(self.params['pretrain_embedding']),
                                              name='word_embedding' )
-            add_layer_summary(self.embedding.name, self.embedding)
 
     def encode(self, features, mode) -> ENCODER_OUTPUT:
         raise NotImplementedError()

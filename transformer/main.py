@@ -3,8 +3,8 @@ import argparse
 import importlib
 import pickle
 from utils import clear_model, build_estimator
-from encoder_decodeer_helper.dataset import Seq2SeqDataset
-from config.default_config import CHECKPOINT_DIR, DICTIONARY_DIR
+from encoder_decodeer_helper.dataset import BiSeq2SeqDataset
+from config.default_config import CHECKPOINT_DIR
 from transformer.model import model_fn
 from transformer.myconfig import ALL_TRAIN_PARAMS, ALL_RUN_CONFIG
 
@@ -12,7 +12,10 @@ from transformer.myconfig import ALL_TRAIN_PARAMS, ALL_RUN_CONFIG
 def main(args):
     ## Init directory
     model_dir = CHECKPOINT_DIR.format(args.data, args.model)
-    dict_file = DICTIONARY_DIR.format(args.data)
+    dict_file = {
+        'encoder': './data/{}/encoder_dictionary.pkl'.format(args.data),
+        'decoder': './data/{}/decoder_dictionary.pkl'.format(args.data),
+    }
 
     # Init config
     TRAIN_PARAMS = ALL_TRAIN_PARAMS[args.data]
@@ -34,7 +37,7 @@ def main(args):
         clear_model(model_dir)
 
     # Init dataset
-    input_pipe = Seq2SeqDataset(data_file=data_file,
+    input_pipe = BiSeq2SeqDataset(data_file=data_file,
                                 dict_file=dict_file,
                                 epochs=TRAIN_PARAMS['epochs'],
                                 batch_size=TRAIN_PARAMS['batch_size'],
@@ -56,6 +59,7 @@ def main(args):
             'model_dir': model_dir,
             'start_index': input_pipe.start_index,
             'end_index': input_pipe.end_index,
+            'decoder_total_size': input_pipe.decoder_total_size,
             'pretrain_embedding': input_pipe.load_pretrain_embedding()
         }
     )

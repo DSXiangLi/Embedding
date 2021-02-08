@@ -12,14 +12,16 @@ def layer_norm(x):
     layer normalization from Jimmy, apply normalization along feature and apply transformation
     """
     with tf.variable_scope('layer_normalization', reuse=tf.AUTO_REUSE):
+        d_model = x.shape.as_list()[-1]
         epsilon = tf.constant(np.finfo(np.float32).eps)
         mean, variance = tf.nn.moments(x, axes=-1, keep_dims=True)
         x = (x - mean)/((variance + epsilon)**0.5) # do layer norm
-        add_layer_summary('layer_norm', x)
-        x = tf.layers.dense(x, units=x.get_shape().as_list()[-1],
-                            kernel_initializer=tf.ones_initializer(),
-                            bias_initializer=tf.zeros_initializer(),
-                            activation=None) # add linear transformation after norm
+        add_layer_summary('norm', x)
+
+        kernel = tf.get_variable('norm_kernel', shape=(d_model,), initializer=tf.ones_initializer())
+        bias = tf.get_variable('norm_bias', shape=(d_model,),initializer=tf.zeros_initializer())
+        x= tf.multiply(kernel, x) +bias
+        add_layer_summary('norm_transform', x)
     return x
 
 
@@ -30,7 +32,6 @@ def add_and_norm_layer(x, sub_layer_x):
     with tf.variable_scope('add_and_norm'):
         x = tf.add(x, sub_layer_x)
         x = layer_norm(x)
-        add_layer_summary('add_and_norm', x)
     return x
 
 
@@ -62,8 +63,8 @@ def future_mask_gen(input_, params):
     # give 0 to all padding position for both key and query
     seq_mask = seq_mask_gen(input_, params) # batch_size * 1 * key_len
     # batch_size * key_len * key_len(seq_len)
-    mask = tf.matmul(seq_mask, seq_mask, transpose_a=True) # batch_size * key_len * key_len
-    # keep upper triangle with diagonal
+    mask = tf.matmul(seq_mask, seq_mask, transpose_a=True)
+    # keep lower triangle with diagonal
     mask = tf.matrix_band_part(mask, num_lower=-1, num_upper=0)
 
     return mask
@@ -87,9 +88,9 @@ def scaled_dot_product_attention(key, value, query, mask):
 
         # apply mask: large negative will become 0 in softmax[mask=0 ignore]
         weight += (1-mask) * (-2**32+1)
-
         # normalize on axis key_len so that score add up to 1
         weight = tf.nn.softmax(weight, axis=-1)
+        tf.summary.image("attention", tf.expand_dims(weight[:1], -1))  # add channel dim
         add_layer_summary('attention', weight)
         # weighted value: batch_size * query_len * emb_size
         weighted_value = tf.matmul(weight, value )
@@ -108,7 +109,6 @@ def multi_head_attention(key, value, query, mask, params, mode):
     output:
         weighted_val: batch_size * query_len * emb_size
     """
-    ##TODO: figure out the different between multihead and
     with tf.variable_scope('multi_head_attention', reuse=tf.AUTO_REUSE):
         d_model = value.shape.as_list()[-1] # emb_size
         # linear projection with dimension unchaangned
@@ -149,7 +149,7 @@ def positional_encoding(d_model, max_len, dtype):
         encoding: max_len * emb_size
     """
     with tf.variable_scope('positional_encoding'):
-        encoding_row = np.array([10000**((i//2)/d_model) for i in range(d_model)])
+        encoding_row = np.array([10000**((i-i%2)/d_model) for i in range(d_model)])
         encoding_matrix = np.array([i/encoding_row for i in range(max_len)])
 
         def sin_cos(row):
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     sess = tf.Session()
 
     ## visualize positional encoding
-    PE = positional_encoding(d_model=50, max_len=10, dtype=tf.float32)
+    PE = positional_encoding(d_model=100, max_len=10, dtype=tf.float32)
     PE = sess.run(PE)
     import seaborn as sns
     import matplotlib.pyplot as plt

@@ -41,10 +41,10 @@ class Transformer(BaseEncoderDecoder):
             self_mask = seq_mask_gen(features, self.params)
 
             for i in range(self.params['encode_attention_layers']):
-                with tf.variable_scope('attention_layer_{}'.format(i), reuse=tf.AUTO_REUSE):
+                with tf.variable_scope('self_attention_layer_{}'.format(i), reuse=tf.AUTO_REUSE):
                     encoder_input = multi_head_attention(key=encoder_input, query=encoder_input, value=encoder_input,
                                                          mask=self_mask, params=self.params, mode=mode)
-                    add_layer_summary('self_attention_output', encoder_input)
+                    add_layer_summary('output', encoder_input)
 
                     encoder_input = ffn(encoder_input, self.params, mode)
                     add_layer_summary('ffn', encoder_input)
@@ -71,18 +71,18 @@ class Transformer(BaseEncoderDecoder):
                     decoder_input = multi_head_attention(key=decoder_input, value=decoder_input,
                                                          query=decoder_input, mask=self_mask,
                                                          params=self.params, mode=mode)
-                    add_layer_summary('self_attention_output', decoder_input)
+                    add_layer_summary('output', decoder_input)
                 with tf.variable_scope('encode_attention', reuse=tf.AUTO_REUSE):
                     decoder_input = multi_head_attention(key=encoder_output.output, value=encoder_output.output,
                                                          query=decoder_input, mask=encoder_mask,
                                                          params=self.params, mode=mode)
-                    add_layer_summary('encoder_attention_output', decoder_input)
+                    add_layer_summary('output', decoder_input)
 
                 decoder_input = ffn(decoder_input, self.params, mode)
                 add_layer_summary('ffn', decoder_input)
 
         # use share embedding weight for linear project from emb_size to vocab_size
-        logits = tf.matmul(decoder_input, self.embedding, transpose_b=True)  # seq_len * emb_size->seq_len * vocab_size
+        logits = tf.matmul(decoder_input, self.embedding, transpose_b=True)  # seq_len * emb_size->seq_len * target_vocab_size
 
         return DECODER_OUTPUT(output=logits, state=decoder_input, seq_len=labels['seq_len'])
 
@@ -106,7 +106,7 @@ class Transformer(BaseEncoderDecoder):
                 labels['seq_len'] = tf.ones(batch_size, dtype=self.params['dtype'])  # batch_size
                 # iteratively add decode prediction to decode source
 
-                for i in range(self.params['max_decode_iter']):
+                for i in range(self.params['max_len']):
                     decoder_output = self._decode_helper(encoder_output, features, labels, mode)
                     # add predict token to decode source
                     predict_vocab = tf.argmax(decoder_output.output[:, -1, :], axis=-1,
@@ -117,7 +117,8 @@ class Transformer(BaseEncoderDecoder):
                                                                      tf.ones(batch_size, dtype=self.params['dtype']))  # (batch_size,)
 
             if mode != tf.estimator.ModeKeys.PREDICT:
-                tf.summary.text('decode_source', token2sequence(labels['tokens'][0, :-1]))
+                tf.summary.text('encode', token2sequence(features['tokens'][0, :]) )
+                tf.summary.text('decode_token', token2sequence(labels['tokens'][0, :]))
                 tf.summary.text('decode_prediction', token2sequence(tf.argmax(decoder_output.output[0, :, :],
                                                                               axis=-1, output_type=tf.int32)))
 
