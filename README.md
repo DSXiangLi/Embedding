@@ -1,7 +1,7 @@
 # Embedding
+Requirement: Tensorflow 1.14, Tensorboard 1.14
 
 ### Model Draft
-
 #### 1. Word2vec Demo 
 bash data/sogou_news_big/extract_file.sh
 
@@ -30,6 +30,10 @@ skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
 
 cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 
+#### 5. Transformer 
+bash data/wmt/run.sh 
+
+python transformer/main.py --clear_model 1 --step train --gpu 1 
 
 ### Paper List 
 #### 词向量
@@ -79,3 +83,4 @@ cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 - [无所不能的Embedding3 - word2vec->Doc2vec[PV-DM/PV-DBOW]](https://www.cnblogs.com/gogoSandy/p/13773327.html)
 - [无所不能的Embedding4 - Doc2vec第二弹[skip-thought & tf-Seq2Seq源码解析] ](https://www.cnblogs.com/gogoSandy/p/14009265.html)
 - [无所不能的Embedding5 - skip-thought的兄弟们[Trim/CNN-LSTM/quick-thought] ](https://www.cnblogs.com/gogoSandy/p/14094590.html)
+- [无所不能的Embedding6 - 跨入Transformer时代～模型详解&代码实现](https://www.cnblogs.com/gogoSandy/p/14386998.html)
