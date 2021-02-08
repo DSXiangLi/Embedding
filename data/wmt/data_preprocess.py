@@ -4,11 +4,10 @@ import jieba
 from pathos.multiprocessing import ProcessingPool
 from data.preprocess_util import str_utils_en, str_utils_ch, dump_dictionary
 
-
 def merge_blanks(src, targ, verbose=False):
     """
-    Borrow text merge from https://github.com/twairball/t2t_wmt_zhen
-    Simple readline will lead to English and Chinese lines mismatch
+    text merge credit to https://github.com/twairball/t2t_wmt_zhen
+    without merge, English and Chinese lines count mismatch
     """
     merges_done = []  # array of indices of rows merged
     sub = None  # replace sentence after merge
@@ -26,7 +25,6 @@ def merge_blanks(src, targ, verbose=False):
 
             t = _preprocess_sgm(targ_lines[i].decode('utf-8').rstrip(), is_sgm)
             t_next = _preprocess_sgm(targ_lines[i + 1].decode('utf-8').rstrip(), is_sgm)
-
             if t == '.':
                 t = ''
             if t_next == '.':
@@ -92,6 +90,7 @@ def _preprocess_sgm(line, is_sgm):
   if line.startswith("<seg") and line.endswith("</seg>"):
     i = line.index(">")
     return line[i + 1:-6]  # Strip first <seg ...> and last </seg>.
+  return ""
 
 
 def filter_sample(source_sentences, target_sentences):
@@ -101,9 +100,9 @@ def filter_sample(source_sentences, target_sentences):
     new_source = []
     new_target = []
     for source, target in zip(source_sentences, target_sentences):
-        if (len(source)<=4) or (len(target)<=4):
+        if (len(source)<=5) or (len(target)<=5):
             continue
-        elif (len(source)>30) or(len(target)>30):
+        elif (len(source)>20) or(len(target)>20):
             continue
         else:
             new_source.append(source)
@@ -111,7 +110,7 @@ def filter_sample(source_sentences, target_sentences):
     return new_source, new_target
 
 
-def main(data_dir, file_dict, surfix):
+def main(data_dir, file_dict, surfix, dry_run_dict):
     encoder_path = '{}/{}_encoder_source.txt'.format(data_dir, surfix)
     decoder_path = '{}/{}_decoder_source.txt'.format(data_dir, surfix)
 
@@ -127,7 +126,7 @@ def main(data_dir, file_dict, surfix):
     jieba.initialize()
     jieba.disable_parallel()
     with ProcessingPool(nodes=min(os.cpu_count(), 5)) as pool:
-        source_sentences = pool.map(lambda x: x.strip().lower().split(' '), source_sentences)
+        source_sentences = pool.map(lambda x: [i.strip() for i in x.strip().lower().split(' ') if len(i)>=1], source_sentences)
     with ProcessingPool(nodes=min(os.cpu_count(), 5)) as pool:
         target_sentences = pool.map(lambda x: [i.strip() for i in jieba.cut(x.strip(), cut_all=False) if len(i)>=1], target_sentences)
     print('Triple check source={}, target={}'.format(len(source_sentences), len(target_sentences)))
@@ -142,19 +141,19 @@ def main(data_dir, file_dict, surfix):
             fd.write(' '.join(decoder_source).lower())
             fd.write('\n')
 
-    print('Dumping Original Dictionary')
     # better sub tokenizer can be used to generate dictionary
-    dump_dictionary(data_dir, source_sentences, prefix='source', debug=True)
-    dump_dictionary(data_dir, target_sentences, prefix='target', debug=True)
-    dump_dictionary(data_dir, target_sentences+source_sentences, debug=True)
+    dump_dictionary(data_dir, source_sentences, prefix='source', debug=True, dry_run=dry_run_dict)
+    dump_dictionary(data_dir, target_sentences, prefix='target', debug=True, dry_run=dry_run_dict)
 
 
 if __name__=='__main__':
     data_dir = './data/wmt'
     const_dir = 'const'
+
     file_dict = {'source': 'news-commentary-v12.zh-en.en',
                  'target': 'news-commentary-v12.zh-en.zh'}
-    main(data_dir, file_dict, surfix='train')
+    main(data_dir, file_dict, surfix='train', dry_run_dict=False)
+
     file_dict = {'source': 'newsdev2017-enzh-src.en.sgm',
                  'target': 'newsdev2017-enzh-ref.zh.sgm'}
-    main(data_dir, file_dict,  surfix='dev')
+    main(data_dir, file_dict,  surfix='dev', dry_run_dict=True)

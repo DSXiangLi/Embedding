@@ -8,3 +8,5 @@ tar -zvxf $DIR/dev.tgz --directory $DIR
 
 cp $DIR/training/*zh-en* $DIR/
 cp $DIR/dev/*enzh* $DIR/
+
+python $DIR/data_preprocess.py
