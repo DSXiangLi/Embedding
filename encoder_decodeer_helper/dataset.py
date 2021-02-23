@@ -1,9 +1,6 @@
 # -*- coding=utf-8 -*-
-
 import numpy as np
 import tensorflow as tf
-
-
 from BaseDataset import *
 
 
@@ -137,7 +134,6 @@ class Seq2SeqDataset(BaseDataset):
 
             if not is_predict:
                 dataset = dataset. \
-                    shuffle(self.buffer_size).\
                     repeat()
 
                 dataset = dataset. \
@@ -176,25 +172,69 @@ class Seq2SeqDataset(BaseDataset):
         return helper
 
 
+class BiSeq2SeqDataset(Seq2SeqDataset):
+    """
+    Bi-Lingual seq2seq Dataset, overwrite below for 2 language
+    - build_dictionary
+    - special_mapping
+    """
+    def __init__(self, data_file, dict_file, epochs, batch_size, buffer_size, min_count, max_count,
+                 special_token, max_len, min_len, pretrain_model_list):
+        super(BiSeq2SeqDataset, self).__init__(data_file, dict_file, epochs, batch_size, buffer_size, min_count,
+                                               max_count, special_token, max_len, min_len, pretrain_model_list)
+
+    def load_dictionary(self, filename):
+        with open(filename, 'rb') as f:
+            dictionary = pickle.load(f)
+        dictionary = dict([(i, j) for i, j in dictionary.items() if (j >= self.min_count) and (j <= self.max_count)])
+        return dictionary
+
+    def build_dictionary(self):
+        """
+        Overwrite base, because it is bi-lingual, id order must be decoder < special < encoder, so that decoder only need
+        first decoder+special size for loss calculation
+        """
+        encoder_dict = self.load_dictionary(self.dict_file['encoder'])
+        decoder_dict = self.load_dictionary(self.dict_file['decoder'])
+
+        self.decoder_size = len(decoder_dict)
+        self.decoder_total_size = self.decoder_size + self.special_size
+
+        encoder_list = [i for i in encoder_dict if i not in decoder_dict]
+        dictionary= dict([(key,i) for i, key in enumerate(decoder_dict.keys())] + \
+                          [(key, i + self.decoder_total_size) for i, key in enumerate(encoder_list)])
+        dictionary.update(self.special_mapping)
+
+        self._dictionary = collections.OrderedDict( sorted(dictionary.items(), key = lambda x:x[1]) )
+
+    @property
+    def special_mapping(self):
+        return dict([(key, i + self.decoder_size) for i, key in enumerate(self.special_token._asdict().values())])
+
+
 if __name__ == '__main__':
     from config.bookcorpus_config import MySpecialToken
     from config.default_config import get_pretrain_model
     sess = tf.Session()
 
-    data = 'bookcorpus'
-    input_pipe = Seq2SeqDataset(data_file={
+    data = 'wmt'
+    input_pipe = BiSeq2SeqDataset(data_file={
                                     'encoder': './data/{}/train_encoder_source.txt'.format(data),
                                     'decoder': './data/{}/train_decoder_source.txt'.format(data)
                                 },
-                                dict_file='./data/{}/dictionary.pkl'.format(data),
+                                dict_file= {
+                                    'encoder': './data/{}/encoder_dictionary.pkl'.format(data),
+                                    'decoder': './data/{}/decoder_dictionary.pkl'.format(data),
+
+                                },
                                 epochs=10,
-                                batch_size=50,
+                                batch_size=1,
                                 buffer_size=128,
-                                min_count=2,
-                                max_count=50000,
+                                max_len=20,
+                                min_len=5,
+                                min_count=3,
+                                max_count=8000,
                                 special_token=MySpecialToken,
-                                max_len=10,
-                                min_len=4,
                                 pretrain_model_list=[get_pretrain_model('gn300')]
     )
     input_pipe.build_dictionary()
@@ -214,3 +254,6 @@ if __name__ == '__main__':
     print(sess.run( iterator.get_next() ))
 
     embedding = input_pipe.load_pretrain_embedding()
+
+
+
