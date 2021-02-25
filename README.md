@@ -84,3 +84,4 @@ python transformer/main.py --clear_model 1 --step train --gpu 1
 - [无所不能的Embedding4 - skip-thought & tf-Seq2Seq源码解析](https://www.cnblogs.com/gogoSandy/p/14009265.html)
 - [无所不能的Embedding5 - skip-thought的兄弟们[Trim/CNN-LSTM/quick-thought] ](https://www.cnblogs.com/gogoSandy/p/14094590.html)
 - [无所不能的Embedding6 - 跨入Transformer时代～模型详解&代码实现](https://www.cnblogs.com/gogoSandy/p/14386998.html)
+- [无所不能的Embedding7 - 探索通用文本表达[FastSent/InferSent/GenSen/USE] ](https://www.cnblogs.com/gogoSandy/p/14439293.html)
