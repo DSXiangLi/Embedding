@@ -20,7 +20,7 @@ bash doc2vec/model_run.sh
 Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
 
 #### 4. Encoder-Decoder Family
-数据： bash data/bookcorpus/run.sh
+Bookcorpus数据： bash data/bookcorpus/run.sh
 
 预训练词向量： bash data/pretrain_model/download_pretrain.sh
 
@@ -31,7 +31,9 @@ skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
 cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 
 #### 5. Transformer 
-bash data/wmt/run.sh 
+WMT数据：bash data/wmt/run.sh 
+
+预训练词向量： bash data/pretrain_model/download_pretrain.sh
 
 python transformer/main.py --clear_model 1 --step train --gpu 1 
 
