@@ -30,4 +30,5 @@ python transformer/main.py --gpu 1 --clear_model 1
 4. 预测
 
 python transformer/main.py --step predict --gpu 1 --clear_model 1 
+
 case: test_inference.py 
