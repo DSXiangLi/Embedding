@@ -13,7 +13,7 @@ WMT_UPDATE = {
     'max_count': 8000,
     'warmup': True,
     'warmup_steps': 10000,
-    'pretrain_model_list': [get_pretrain_model('gn300'), get_pretrain_model('ft300')],
+    'pretrain_model_list': [get_pretrain_model('gn300'), get_pretrain_model('ft300')], # [] for random initialization
     'encode_attention_layers': 3,
     'decode_attention_layers': 3,
     'num_head': 12,
