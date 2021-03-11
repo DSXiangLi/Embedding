@@ -29,5 +29,5 @@ data/*.txt
 data/squad/*.pkl
 data/squad/*.txt
 data/squad/*.json
-data/wmt/*.pkl
-data/wmt/news*
+data/wmt/*
+data/quora_question_pair/*.csv
