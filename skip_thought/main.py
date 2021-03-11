@@ -28,7 +28,7 @@ def main(args):
     else:
         data_file = {
             'encoder': './data/{}/dev_encoder_source.txt'.format(args.data),
-            'decoder': './data/{}/dev_decoder_source.txt'.format(args.data) # for predict, this can be same as encoder
+            'decoder': './data/{}/dev_encoder_source.txt'.format(args.data)
         }
 
     if args.clear_model:

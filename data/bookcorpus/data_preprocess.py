@@ -1,4 +1,5 @@
 
+
 import os
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
@@ -25,8 +26,7 @@ def main(data_dir, const_dir, language):
     train_encoder_path = '{}/train_encoder_source.txt'.format( data_dir )
     train_decoder_path = '{}/train_decoder_source.txt'.format(data_dir)
 
-    dev_encoder_path = '{}/dev_encoder_source.txt'.format( data_dir )
-    dev_decoder_path = '{}/dev_decoder_source.txt'.format(data_dir)
+    dev_path = '{}/dev_encoder_source.txt'.format( data_dir )
 
     preprocess = StrUtils(os.path.join(const_dir, language), language)
 
@@ -43,11 +43,11 @@ def main(data_dir, const_dir, language):
             f.write('\n')
 
     print('Making Triplets out of clean corpus')
-    train_sample = make_triplet(sentences)
-    train_sample = shuffle(train_sample)
-    train, dev = train_test_split(train_sample, test_size=0.2, random_state=1234)
+    train, dev = train_test_split(sentences, test_size=0.2, random_state=1234)
+    train = make_triplet(train)
+    train = shuffle(train)
 
-    print('Writing triplets into encoder and decoder source at'.format(data_dir))
+    print('Writing triplets into encoder and decoder source at {}'.format(data_dir))
     with open(train_encoder_path, 'w', encoding='utf-8') as fe, open(train_decoder_path, 'w', encoding='utf-8') as fd :
         for encoder_source, decoder_source in train:
             fe.write(' '.join(encoder_source).lower())
@@ -55,12 +55,10 @@ def main(data_dir, const_dir, language):
             fd.write(' '.join(decoder_source).lower())
             fd.write('\n')
 
-    with open(dev_encoder_path, 'w', encoding='utf-8') as fe, open(dev_decoder_path, 'w', encoding='utf-8') as fd :
-        for encoder_source, decoder_source in train:
-            fe.write(' '.join(encoder_source).lower())
+    with open(dev_path, 'w', encoding='utf-8') as fe:
+        for text in dev:
+            fe.write(' '.join(text).lower())
             fe.write('\n')
-            fd.write(' '.join(decoder_source).lower())
-            fd.write('\n')
 
     print( 'Dumping Original Dictionary' )
     dump_dictionary( data_dir, sentences, debug= True)
