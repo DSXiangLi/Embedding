@@ -30,12 +30,8 @@ skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
 
 cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 
-#### 5. Transformer 
-WMT数据：bash data/wmt/run.sh 
+#### 5. Transformer： 基于WMT英翻中任务实现transformer，详见Folder README
 
-预训练词向量： bash data/pretrain_model/download_pretrain.sh
-
-python transformer/main.py --clear_model 1 --step train --gpu 1 
 
 ### Paper List 
 #### 词向量
