@@ -43,7 +43,6 @@ def main(data_dir, const_dir, language):
             f.write(' '.join(line).lower())
             f.write('\n')
 
-    sentences = preprocess.readline('{}/all_sentences.txt'.format(data_dir))
     print('Making Triplets out of clean corpus')
     train, dev = train_test_split(sentences, test_size=0.2, random_state=1234)
     dev = np.unique(dev)
@@ -65,7 +64,6 @@ def main(data_dir, const_dir, language):
 
     print( 'Dumping Original Dictionary' )
     dump_dictionary( data_dir, sentences, debug= True)
-
 
 if __name__ == '__main__':
     data_dir = 'data/bookcorpus'
