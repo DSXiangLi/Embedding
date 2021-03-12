@@ -10,14 +10,16 @@ def find_topn_most_similar(seq_number, all_sentences, embedding_mat,  topn):
 
     sim = np.matmul(np.expand_dims(emb, axis=0), embedding_mat.transpose())
 
-    items = np.squeeze(np.argsort(sim, axis=1)[:, (-topn-1):-1])
+    items = np.squeeze(np.argsort(sim, axis=1)[:, (-topn-1):-1], axis=0)
 
-    scores = np.squeeze(sim[:, items])
+    scores = np.squeeze(sim[:, items], axis=0)
 
     sim_seq = all_sentences[items]
 
+
     for i in range(topn):
         print('Most Similar score = {:.2f} sentences = {}'.format(scores[i], sim_seq[i]))
+
 
 def main(args):
     with open('./data/{}/{}_predict.pkl'.format(args.data, args.model), 'rb') as f:

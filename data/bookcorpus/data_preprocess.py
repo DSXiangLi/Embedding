@@ -1,6 +1,7 @@
 
 
 import os
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from data.preprocess_util import *
@@ -42,8 +43,10 @@ def main(data_dir, const_dir, language):
             f.write(' '.join(line).lower())
             f.write('\n')
 
+    sentences = preprocess.readline('{}/all_sentences.txt'.format(data_dir))
     print('Making Triplets out of clean corpus')
     train, dev = train_test_split(sentences, test_size=0.2, random_state=1234)
+    dev = np.unique(dev)
     train = make_triplet(train)
     train = shuffle(train)
 

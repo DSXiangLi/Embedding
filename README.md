@@ -1,37 +1,14 @@
-# Embedding
+# NLP Embedding
 Requirement: Tensorflow 1.14, Tensorboard 1.14
 
-### Model Draft
-#### 1. Word2vec Demo 
-bash data/sogou_news_big/extract_file.sh
-
-python word2vec/main.py --model SG --train_algo HS  [Skip-gram Hierarchy Softmax]
-
-#### 2. fasttext classification Demo
-python data/quora_fasttext/data_preprocess.py
-
-python fasttext/main.py --gpu 1 [allow using gpu in tf.estimator]
-
-#### 3. Doc2vec Demo and Comparison with Word2vec
-bash data/sogou_news_big/extract_file.sh
-
-bash doc2vec/model_run.sh
-
-Comparison: doc2vec/doc2vec_vs_word2vec_sogou.ipynb
-
-#### 4. Encoder-Decoder Family
-Bookcorpus数据： bash data/bookcorpus/run.sh
-
-预训练词向量： bash data/pretrain_model/download_pretrain.sh
-
-老代码在skip_thought_archived, 重构代码如下
-
-skip-thought:  python skip_thought/main.py --clear_model 1 --step train --gpu 1
-
-cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
-
-#### 5. Transformer： 基于WMT英翻中任务实现transformer，详见Folder README
-
+### Model List
+1. Word2Vec: sogou新闻数据
+2. Fasttext: quora kaggle 分类数据
+3. Doc2Vec[PV-DBOW/PV-DM]: sogou新闻数据
+4. skip-thought: bookcorpus爬虫数据
+5. quick-thought: bookcorpus爬虫数据
+6. CNN-LSTM: bookcorpus爬虫数据
+7. transformer: WMT英翻中任务
 
 ### Paper List 
 #### 词向量
@@ -43,6 +20,7 @@ cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 - [Fasttext] Bag of Tricks for Efficient Text Classification (Facebook 2016)
 - [Glove] Global Vectors for Word Representation (2014)
 - [ELMo] Deep contextualized word representations (2018)
+
 #### 文本向量
 - [Doc2vec] Distributed Representations of Sentences and Documents (Google 2014)
 - [Doc2vec] A SIMPLE BUT TOUGH-TO-BEAT BASELINE FOR SEN- TENCE EMBEDDINGS (2017)
@@ -65,15 +43,6 @@ cnn-lstm:  python cnn_lstm/main.py --clear_model 1 --step train --gpu 1
 - [Representation] What you can cram into a single vector: Probing Sentence Embedding for linguistic properties(2018)
 - [Representation] Assessing Composition in Sentence Vector Representations (2018)
 
-#### 物品向量
-- [Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)
-- [Airbnb] Real-time Personalization using Embeddings for Search Ranking at Airbnb (Airbnb 2018)
-- [DeepWalk] DeepWalk- Online Learning of Social Representations (SBU 2014)
-- [Node2vec] Node2vec - Scalable Feature Learning for Networks (Stanford 2016)
-- [Alibaba] Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba (Alibaba 2018)
-#### 召回
-- [LSH] Locality-Sensitive Hashing for Finding Nearest Neighbors (2008)
-- [HNSW] Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs(2016)
 
 ### Blog 
 - [无所不能的Embedding1 - Word2vec模型详解&代码实现](https://www.cnblogs.com/gogoSandy/p/13418257.html)

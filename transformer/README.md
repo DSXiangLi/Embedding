@@ -1,5 +1,5 @@
 ## Transformer 
-paper: Attention is all you need 
+Tutorial: [无所不能的Embedding6 - 跨入Transformer时代～模型详解&代码实现](https://www.cnblogs.com/gogoSandy/p/14386998.html)
 
 这里我们用WMT英翻中来实现Transformer，加入预训练词向量来初始化Embedding
 
