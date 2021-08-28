@@ -1,6 +1,8 @@
 # NLP Embedding
 Requirement: Tensorflow 1.14, Tensorboard 1.14
 
+The code is not rigorously tested, if you find a bug, welcome PR ^_^ ~
+
 ### Model List
 1. Word2Vec: sogou新闻数据
 2. Fasttext: quora kaggle 分类数据
